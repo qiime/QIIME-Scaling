@@ -1,28 +1,25 @@
 #!/bin/bash
 
 # Check if the user has provided a command to execute
-if [[ $# -eq 0 ]]; then
-	echo "USAGE: timing_wrapper.sh command [command args]"
+if [[ $# -le 1 ]]; then
+	echo "USAGE: timing_wrapper.sh time_output_fp command [command args]"
 	exit 1
 fi
 
+# Get the output filepath of the time command
+output_fp=$1
 # Get the command to execute
-cmd=$1
+cmd=$2
 # Get the arguments of the command
-args=${@:2}
+args=${@:3}
 
-# Get the basename of the command (without the file extension)
-basename=`basename $cmd | cut -d. -f1`
-
-# Get a string with current date in the following format:
-#  _YYYYMMDD_HHMMSS
-cdate=`date +_%Y%m%d_%H%M%S`
-
-# Create a file name for the output of the time command
-#   format:  basename_YYYYMMDD_HHMMSS.txt
-# Thus, this wrapper can be used multiple times over the same
-#  command keeping all the outputs
-filename=$basename$cdate".txt"
+# If the output file exists, add the date to it
+if [ -f $output_fp ]; then
+	# Get a string with current date in the following format:
+	#  _YYYYMMDD_HHMMSS
+	cdate=`date +_%Y%m%d_%H%M%S`
+	output_fp=$output_fp$cdate
+fi
 
 # Launch the command through "time"
 #  The output format is:
@@ -38,7 +35,7 @@ filename=$basename$cdate".txt"
 #         that the process has been not running due to scheduling
 #
 #  We use this output format because it is easy to parse
-/usr/bin/time -o $filename -f"%e;%U;%S;%M" $cmd $args > /dev/null 2> /dev/null
+/usr/bin/time -o $output_fp -f"%e;%U;%S;%M" $cmd $args > /dev/null 2> /dev/null
 
 # Check if the command cmd has finished correctly
 #  If cmd has finished on success, the time output file will
@@ -46,7 +43,7 @@ filename=$basename$cdate".txt"
 #  Otherwise, the time output file will have two lines:
 #    one with 'Command exited with non-zero status X'
 #    and the second one with the status
-lines=`cat $filename | wc -l`
+lines=`cat $output_fp | wc -l`
 if [[ $lines -ne 1 ]]; then
 	echo "The command has not finished correctly."
 fi
