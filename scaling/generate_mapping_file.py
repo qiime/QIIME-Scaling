@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 __author__ = "Jose Antonio Navas Molina"
-__copyright__ = "Copyright 2011, The QIIME Scaling Project"
+__copyright__ = "Copyright 2013, The QIIME Scaling Project"
 __credits__ = ["Jose Antonio Navas Molina"]
 __license__ = "GPL"
 __version__ = "0.0.1-dev"
@@ -10,7 +10,6 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 from biom.parse import parse_biom_table
-from os.path import split, splitext
 from numpy.random import rand, randint
 
 def parse_reference_file(lines):
@@ -32,7 +31,11 @@ def parse_reference_file(lines):
 		line = line.strip()
 		if line:
 			if not line.startswith('#'):
-				rev_comp, golay_bc, rev_prim_pad, rev_prim_link, rev_prim, idx = line.split('\t')
+				try:
+					(rev_comp, golay_bc, rev_prim_pad,
+						rev_prim_link, rev_prim, idx) = line.split('\t')
+				except ValueError, e:
+					raise ValueError, "The reference file is not well-formated"
 				yield golay_bc
 
 def random_discrete_value(num_values):
@@ -61,39 +64,49 @@ def random_continuous_value(num_values):
 	for val in rand_values:
 		yield val
 
-def create_mapping_file(otu_table, out_file, bc_generator, primer):
-	"""Creates a mapping file in out_file for otu_table.
+def generate_mapping_file(biom_fp, barcode_ref_fp, primer, output_fp):
+	""" Creates a mapping file in output_fp for the otu table biom_fp
 
 	Arguments:
-		- otu_table: the OTU table
-		- out_file: the output file object where to write the mapping file
-		- bc_generator: the barcode generator
-		- primer: the linker primer sequence
+		- biom_fp: the otu table file path in biom format
+		- barcode_ref_fp: the reference file used to get the barcodes
+		- primer: primer sequence to use in the mapping file
+		- output_fp: output mapping file
 
-	Creates a mapping file in 'out_file' for the otu table 'otu_table' using
-	the barcode generator 'bc_generator' and the linker primer sequence 'primer'.
-	It also adds a 'Discrete' column which contains discrete values, a 'Continous'
-	columns which contains continuous values and a 'Description' column.
+	Creates a mapping file in 'output_fp' for the otu table 'biom_fp' using
+	barcodes from the 'barcode_ref_fp' file and the linker primer sequence
+	'primer'. It also adds to the mapping file two columns: 'Discrete' and 
+	'Continuous', which contains a different discrete and continuous values,
+	respectively.
+	E.g. Discrete: Value_A, Value_B and Value_C
+	     Continuous: uniform distribution over [0, 1)
 	"""
-	# Write the headers to the output file
-	out_file.write("#SampleID\tBarcodeSequence\tLinkerPrimerSequence\tDiscrete\tContinuous\tDescription\n")
-	# Create random discrete and continuous value generators
-	rand_discrete = random_discrete_value(len(otu_table.SampleIds))
-	rand_continuous = random_continuous_value(len(otu_table.SampleIds))
-	# For each sampleID create a new line
-	for sid in otu_table.SampleIds:
-		out_file.write(sid+"\t"+bc_generator.next()+"\t"+primer+"\t"+rand_discrete.next()+"\t"+str(rand_continuous.next())+"\t"+"SampleId_"+sid+"\n")
+	# Open all the files
+	biom_file = open(biom_fp, 'U')
+	ref_file = open(barcode_ref_fp, 'U')
+	out_file = open(output_fp, 'w')
 
-def generate_mapping_file(biom_fp, barcode_ref_fp, primer, output_fp):
-	biom_file = open(input_biom, 'U')
-	out_file = open(output_map, 'w')
-	ref_file = open(barcode_ref, 'U')
-
+	# parse the input otu table
 	otu_table = parse_biom_table(biom_file)
+	# create a barcode generator from the reference file
 	bc_generator = parse_reference_file(ref_file)
+	# create a random discrete value generator
+	rand_discrete = random_discrete_value(len(otu_table.SampleIds))
+	# create a random continuous value generator
+	rand_continuous = random_continuous_value(len(otu_table.SampleIds))
 
-	create_mapping_file(otu_table, out_file, bc_generator, primer)
+	# Write headers to the mapping file
+	headers = ['#SampleID', 'BarcodeSequence', 'LinkerPrimerSequence',
+				'Discrete', 'Continuous', 'Description']
+	out_file.write("\t".join(headers) + "\n")
 
+	# Add a new line in the mapping file for each Sample ID
+	for sid in otu_table.SampleIds:
+		values = [sid, bc_generator.next(), primer, rand_discrete.next(),
+				str(rand_continuous.next()), "SampleId_"+sid]
+		out_file.write("\t".join(values) + "\n")
+
+	# Close all the files
 	biom_file.close()
 	out_file.close()
 	ref_file.close()
