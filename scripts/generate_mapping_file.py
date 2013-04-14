@@ -10,7 +10,7 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 from cogent.util.option_parsing import parse_command_line_parameters,\
-										make_option
+                                        make_option
 from scaling.generate_mapping_file import generate_mapping_file
 from os.path import split, splitext
 
@@ -33,31 +33,31 @@ script_info['script_usage'] = [ ("Example:", "Generate the mapping file\
  "%prog -i otu_table.biom -o map_file")]
 script_info['output_description'] = """A QIIME mapping file"""
 script_info['required_options'] = [
-	make_option('-i', '--input_biom', type='existing_filepath',
-		help='OTU table for which the mapping file is for.')
-	]
+    make_option('-i', '--input_biom', type='existing_filepath',
+        help='OTU table for which the mapping file is for.')
+    ]
 script_info['optional_options'] = [
-	make_option('-o', '--output_map', type='new_filepath',
-		help='The output mapping file path.'),
-	make_option('-b', '--barcode_ref', type='existing_filepath',
-		default=DEFAULT_REF_FILE,
-		help="A reference file from where to extract the barcodes\
-		 [default: %default]."),
-	make_option('-p', '--primer', type='string', default=DEFAULT_PRIMER,
-		help='The linker primer sequence to use in the mapping file\
-		 [default: %default].')
-	]
+    make_option('-o', '--output_map', type='new_filepath',
+        help='The output mapping file path.'),
+    make_option('-b', '--barcode_ref', type='existing_filepath',
+        default=DEFAULT_REF_FILE,
+        help="A reference file from where to extract the barcodes\
+         [default: %default]."),
+    make_option('-p', '--primer', type='string', default=DEFAULT_PRIMER,
+        help='The linker primer sequence to use in the mapping file\
+         [default: %default].')
+    ]
 script_info['version'] = __version__
 
 if __name__ == '__main__':
-	option_parser, opts, args = parse_command_line_parameters(**script_info)
-	input_biom = opts.input_biom
-	output_map = opts.output_map
-	barcode_ref = opts.barcode_ref
-	primer = opts.primer
+    option_parser, opts, args = parse_command_line_parameters(**script_info)
+    input_biom = opts.input_biom
+    output_map = opts.output_map
+    barcode_ref = opts.barcode_ref
+    primer = opts.primer
 
-	if not output_map:
-		# Get the otu table file basename and add '_mapping.txt' at the end
-		output_map = splitext(split(input_biom)[1])[0] + '_mapping.txt'
+    if not output_map:
+        # Get the otu table file basename and add '_mapping.txt' at the end
+        output_map = splitext(split(input_biom)[1])[0] + '_mapping.txt'
 
-	generate_mapping_file(input_biom, barcode_ref, primer, output_map)
+    generate_mapping_file(input_biom, barcode_ref, primer, output_map)

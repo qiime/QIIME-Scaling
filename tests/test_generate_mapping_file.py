@@ -14,77 +14,77 @@ from numpy.random import seed
 from qiime.util import get_tmp_filename, load_qiime_config
 from os import remove
 from scaling.generate_mapping_file import parse_reference_file, \
-	random_discrete_value, random_continuous_value, generate_mapping_file
+    random_discrete_value, random_continuous_value, generate_mapping_file
 
 class TestGenerateMappingFile(TestCase):
-	def setUp(self):
-		# Get QIIME's temp dir
-		self.qiime_config = load_qiime_config()
-		self.tmp_dir = self.qiime_config['temp_dir'] or '/tmp/'
-		# Reference files for testing barcode parser
-		self.ref_file = reference_file.splitlines()
-		self.empty_ref_file = empty_reference_file.splitlines()
-		self.bad_ref_file = bad_reference_file.splitlines()
-		# Otu table filepath
-		self.biom_fp = 'support_files/10x10x0.010_bench.biom'
-		# Reference filepath
-		self.ref_fp = 'support_files/test_reference.txt'
-		# Primer sequence to use
-		self.primer = 'TATGGTAATT'
-		# make tests consistent with the seed always being the same
-		seed(123)
+    def setUp(self):
+        # Get QIIME's temp dir
+        self.qiime_config = load_qiime_config()
+        self.tmp_dir = self.qiime_config['temp_dir'] or '/tmp/'
+        # Reference files for testing barcode parser
+        self.ref_file = reference_file.splitlines()
+        self.empty_ref_file = empty_reference_file.splitlines()
+        self.bad_ref_file = bad_reference_file.splitlines()
+        # Otu table filepath
+        self.biom_fp = 'support_files/10x10x0.010_bench.biom'
+        # Reference filepath
+        self.ref_fp = 'support_files/test_reference.txt'
+        # Primer sequence to use
+        self.primer = 'TATGGTAATT'
+        # make tests consistent with the seed always being the same
+        seed(123)
 
-		self._paths_to_clean_up = []
+        self._paths_to_clean_up = []
 
-	def tearDown(self):
-		map(remove, self._paths_to_clean_up)
+    def tearDown(self):
+        map(remove, self._paths_to_clean_up)
 
-	def test_parse_reference_file(self):
-		""""""
-		obs = parse_reference_file(self.ref_file)
-		self.assertEquals(obs.next(), "TCCCTTGTCTCC")
-		self.assertEquals(obs.next(), "ACGAGACTGATT")
-		self.assertEquals(obs.next(), "GCTGTACGGATT")
-		self.assertEquals(obs.next(), "ATCACCAGGTGT")
-		self.assertRaises(StopIteration, obs.next)
+    def test_parse_reference_file(self):
+        """"""
+        obs = parse_reference_file(self.ref_file)
+        self.assertEquals(obs.next(), "TCCCTTGTCTCC")
+        self.assertEquals(obs.next(), "ACGAGACTGATT")
+        self.assertEquals(obs.next(), "GCTGTACGGATT")
+        self.assertEquals(obs.next(), "ATCACCAGGTGT")
+        self.assertRaises(StopIteration, obs.next)
 
-		obs = parse_reference_file(self.empty_ref_file)
-		self.assertRaises(StopIteration, obs.next)
+        obs = parse_reference_file(self.empty_ref_file)
+        self.assertRaises(StopIteration, obs.next)
 
-		obs = parse_reference_file(self.bad_ref_file)
-		self.assertRaises(ValueError, obs.next)
+        obs = parse_reference_file(self.bad_ref_file)
+        self.assertRaises(ValueError, obs.next)
 
 
-	def test_random_discrete_value(self):
-		obs = random_discrete_value(5)
-		self.assertEquals(obs.next(), "Value_C")
-		self.assertEquals(obs.next(), "Value_B")
-		self.assertEquals(obs.next(), "Value_C")
-		self.assertEquals(obs.next(), "Value_C")
-		self.assertEquals(obs.next(), "Value_A")
-		self.assertRaises(StopIteration, obs.next)
+    def test_random_discrete_value(self):
+        obs = random_discrete_value(5)
+        self.assertEquals(obs.next(), "Value_C")
+        self.assertEquals(obs.next(), "Value_B")
+        self.assertEquals(obs.next(), "Value_C")
+        self.assertEquals(obs.next(), "Value_C")
+        self.assertEquals(obs.next(), "Value_A")
+        self.assertRaises(StopIteration, obs.next)
 
-	def test_random_continuos_value(self):
-		obs = random_continuous_value(5)
-		self.assertAlmostEquals(obs.next(), 0.696469185598)
-		self.assertAlmostEquals(obs.next(), 0.28613933495)
-		self.assertAlmostEquals(obs.next(), 0.226851453564)
-		self.assertAlmostEquals(obs.next(), 0.551314769083)
-		self.assertAlmostEquals(obs.next(), 0.719468969786)
-		self.assertRaises(StopIteration, obs.next)
+    def test_random_continuos_value(self):
+        obs = random_continuous_value(5)
+        self.assertAlmostEquals(obs.next(), 0.696469185598)
+        self.assertAlmostEquals(obs.next(), 0.28613933495)
+        self.assertAlmostEquals(obs.next(), 0.226851453564)
+        self.assertAlmostEquals(obs.next(), 0.551314769083)
+        self.assertAlmostEquals(obs.next(), 0.719468969786)
+        self.assertRaises(StopIteration, obs.next)
 
-	def test_generate_mapping_file(self):
-		outpath = get_tmp_filename(tmp_dir=self.tmp_dir,suffix='.txt')
-		self._paths_to_clean_up = [outpath]
+    def test_generate_mapping_file(self):
+        outpath = get_tmp_filename(tmp_dir=self.tmp_dir,suffix='.txt')
+        self._paths_to_clean_up = [outpath]
 
-		generate_mapping_file(self.biom_fp, self.ref_fp, self.primer, outpath)
+        generate_mapping_file(self.biom_fp, self.ref_fp, self.primer, outpath)
 
-		exp = expected_mapping_fp
+        exp = expected_mapping_fp
 
-		outfile = open(outpath, 'U')
-		self.assertEquals(outfile.readlines(), exp)
-		outfile.close()
-		
+        outfile = open(outpath, 'U')
+        self.assertEquals(outfile.readlines(), exp)
+        outfile.close()
+        
 
 
 reference_file="""#This line is a comment and it is ignored
@@ -119,4 +119,4 @@ expected_mapping_fp=[
 "9\tTACAGCGCATAC\tTATGGTAATT\tValue_B\t0.737995405732\tSampleId_9\n"]
 
 if __name__ == '__main__':
-	main()
+    main()
