@@ -11,8 +11,9 @@ __status__ = "Development"
 
 from cogent.util.unit_test import TestCase, main
 from numpy.random import seed
+from numpy import array
 from qiime.util import get_tmp_filename, load_qiime_config
-from os import remove
+from os import remove, path
 from scaling.generate_mapping_file import parse_reference_file, \
     random_discrete_value, random_continuous_value, generate_mapping_file
 
@@ -25,14 +26,14 @@ class TestGenerateMappingFile(TestCase):
         self.ref_file = reference_file.splitlines()
         self.empty_ref_file = empty_reference_file.splitlines()
         self.bad_ref_file = bad_reference_file.splitlines()
+        # Test folder
+        test_folder = path.dirname(path.abspath(__file__))
         # Otu table filepath
-        self.biom_fp = 'support_files/10x10x0.010_bench.biom'
+        self.biom_fp = path.join(test_folder, 'support_files/10x10x0.010_bench.biom')
         # Reference filepath
-        self.ref_fp = 'support_files/test_reference.txt'
+        self.ref_fp = path.join(test_folder, 'support_files/test_reference.txt')
         # Primer sequence to use
         self.primer = 'TATGGTAATT'
-        # make tests consistent with the seed always being the same
-        seed(123)
 
         self._paths_to_clean_up = []
 
@@ -56,7 +57,10 @@ class TestGenerateMappingFile(TestCase):
 
 
     def test_random_discrete_value(self):
-        obs = random_discrete_value(5)
+        def random_func(n=3, size=5):
+            return array([2,1,2,2,0])
+
+        obs = random_discrete_value(5, random_f=random_func)
         self.assertEquals(obs.next(), "Value_C")
         self.assertEquals(obs.next(), "Value_B")
         self.assertEquals(obs.next(), "Value_C")
@@ -65,19 +69,32 @@ class TestGenerateMappingFile(TestCase):
         self.assertRaises(StopIteration, obs.next)
 
     def test_random_continuos_value(self):
-        obs = random_continuous_value(5)
-        self.assertAlmostEquals(obs.next(), 0.696469185598)
-        self.assertAlmostEquals(obs.next(), 0.28613933495)
-        self.assertAlmostEquals(obs.next(), 0.226851453564)
-        self.assertAlmostEquals(obs.next(), 0.551314769083)
-        self.assertAlmostEquals(obs.next(), 0.719468969786)
+        def random_func(n=5):
+            return array([0.123,0.321,0.222,0.5424,0.43124])
+
+        obs = random_continuous_value(5, random_f=random_func)
+        self.assertAlmostEquals(obs.next(), 0.123)
+        self.assertAlmostEquals(obs.next(), 0.321)
+        self.assertAlmostEquals(obs.next(), 0.222)
+        self.assertAlmostEquals(obs.next(), 0.5424)
+        self.assertAlmostEquals(obs.next(), 0.43124)
         self.assertRaises(StopIteration, obs.next)
 
     def test_generate_mapping_file(self):
         outpath = get_tmp_filename(tmp_dir=self.tmp_dir,suffix='.txt')
         self._paths_to_clean_up = [outpath]
 
-        generate_mapping_file(self.biom_fp, self.ref_fp, self.primer, outpath)
+        def random_func_disc(n=3, size=10):
+            return array([2,1,2,2,0,2,2,1,2,1])
+
+        def random_func_cont(n=10):
+            return array([0.980764198385, 0.684829738585, 0.480931901484,
+                0.392117518194, 0.343178016151, 0.729049707384, 0.43857224468, 
+                0.0596778966096, 0.39804425533, 0.737995405732])
+
+
+        generate_mapping_file(self.biom_fp, self.ref_fp, self.primer, outpath,
+            rand_disc_f=random_func_disc, rand_cont_f=random_func_cont)
 
         exp = expected_mapping_fp
 

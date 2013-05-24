@@ -38,7 +38,7 @@ def parse_reference_file(lines):
                     raise ValueError, "The reference file is not well-formated"
                 yield golay_bc
 
-def random_discrete_value(num_values):
+def random_discrete_value(num_values, random_f=randint):
     """Yields a random discrete value from a default set of 3 values
 
     Arguments:
@@ -46,12 +46,12 @@ def random_discrete_value(num_values):
 
     The default set of values is (Value_A, Value_B and Value_C)
     """
-    rand_idx = randint(3, size=num_values)
+    rand_idx = random_f(3, size=num_values)
     values_list = ['Value_A','Value_B','Value_C']
     for i in rand_idx:
         yield values_list[i]
 
-def random_continuous_value(num_values):
+def random_continuous_value(num_values, random_f=rand):
     """Yields a random continuous values from the interval [0, 1)
     
     Arguments:
@@ -60,11 +60,12 @@ def random_continuous_value(num_values):
     Uses numpy.random.rand to return random number from a uniform
     distribution over [0, 1)
     """
-    rand_values = rand(num_values)
+    rand_values = random_f(num_values)
     for val in rand_values:
         yield val
 
-def generate_mapping_file(biom_fp, barcode_ref_fp, primer, output_fp):
+def generate_mapping_file(biom_fp, barcode_ref_fp, primer, output_fp,
+                                    rand_disc_f=randint, rand_cont_f=rand):
     """ Creates a mapping file in output_fp for the otu table biom_fp
 
     Arguments:
@@ -91,9 +92,10 @@ def generate_mapping_file(biom_fp, barcode_ref_fp, primer, output_fp):
     # create a barcode generator from the reference file
     bc_generator = parse_reference_file(ref_file)
     # create a random discrete value generator
-    rand_discrete = random_discrete_value(len(otu_table.SampleIds))
+    rand_discrete = random_discrete_value(len(otu_table.SampleIds), rand_disc_f)
     # create a random continuous value generator
-    rand_continuous = random_continuous_value(len(otu_table.SampleIds))
+    rand_continuous = random_continuous_value(len(otu_table.SampleIds),
+        rand_cont_f)
 
     # Write headers to the mapping file
     headers = ['#SampleID', 'BarcodeSequence', 'LinkerPrimerSequence',
