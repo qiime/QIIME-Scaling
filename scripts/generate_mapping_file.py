@@ -12,9 +12,9 @@ __status__ = "Development"
 from cogent.util.option_parsing import parse_command_line_parameters,\
                                         make_option
 from scaling.generate_mapping_file import generate_mapping_file
-from os.path import split, splitext
+from os.path import split, splitext, join, dirname, abspath
 
-DEFAULT_REF_FILE = '../scaling/support_files/Caporaso_et_al_ISME_2012_8.txt'
+DEFAULT_REF_FILE = join(dirname(abspath(__file__)), '../scaling/support_files/Caporaso_et_al_ISME_2012_8.txt')
 DEFAULT_PRIMER = 'TATGGTAATT'
 
 script_info = {}
