@@ -47,6 +47,7 @@ def get_bench_files(input_dirs):
                     "cannot contain any folder: %s" % dirpath
             for f in filenames:
                 dir_files.append(join(dirpath, f))
+        dir_files = sorted(dir_files)
         bench_files_by_dir.append(dir_files)
 
     bench_files = []
@@ -69,19 +70,25 @@ def get_command_string(command, var_opts, input_fps, out_opt, output_dir,
         output_dir: path to the directory which will contain the command output
         time_dir: path to the directory which will contain the benchmark results
         index: iteration number for the current command
+
+    Note: Raises ValueError if var_opts and input_fps don't have the same length
     """
+    if len(var_opts) != len(input_fps):
+        raise ValueError, "The number of input options and the number of " +\
+            "benchmark files should be the same"
+
     out_path = join(output_dir, str(index))
     time_fp = join(time_dir, str(index) + '.txt')
     input_files_str = ""
     for opt, fp in zip(var_opts, input_fps):
         input_files_str = " ".join([input_files_str, opt, fp])
 
-    print input_files_str
+    command_str = COMMAND_TEMPLATE % (time_fp, command, input_files_str,
+        out_opt, out_path)
 
-    return COMMAND_TEMPLATE % (time_fp, command, input_files_str, out_opt,
-        out_path)
+    return command_str.replace("\"", "")
 
-def make_pbs_file(command, var_opts, input_dirs, out_opt, bench_dir, output_fp, 
+def make_pbs_file(command, var_opts, input_dirs, out_opt, bench_dir, pbs_fp, 
     bench_name, num_reps, force):
     """Generate a PBS file for benchmarking a command
 
@@ -95,15 +102,10 @@ def make_pbs_file(command, var_opts, input_dirs, out_opt, bench_dir, output_fp,
             output
         bench_dir: path to the directory where the benchmark results will be
             stored
-        output_fp: path to write the output PBS file
+        pbs_fp: path to write the output PBS file
         bench_name: name of the benchmark. It will be displayed in qstat
         num_reps: number of times each command should be executed
     """
-    # Get the list of the benchmark files
-    bench_files = get_bench_files(input_dirs)
-    # for input_dir in input_dirs:
-    #     bench_files.append(get_bench_files(input_dir))
-
     # Create the benchmark folder if it doesn't exists
     if exists(bench_dir):
         if not force:
@@ -123,8 +125,11 @@ def make_pbs_file(command, var_opts, input_dirs, out_opt, bench_dir, output_fp,
     if not exists(base_time_dir):
         mkdir(base_time_dir)
 
+    # Get the list of the benchmark files
+    bench_files = get_bench_files(input_dirs)
+
     # Write the PBS header
-    outf = open(output_fp, 'w')
+    outf = open(pbs_fp, 'w')
     outf.write(PBS_HEADER % bench_name)
 
     # Iterate over all the benchmark files
