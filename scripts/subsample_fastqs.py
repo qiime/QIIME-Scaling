@@ -21,8 +21,8 @@ script_info['script_usage']=[]
 script_info['script_usage'].append(
     ("""Example:""",
     """Subsample seqs.fastq and seqs_barcodes.fastq to approximately 5%""",
-    """%prog -i $PWD/seqs.fna -b $PWD/seqs_barcodes.fastq -p 0.05 """ +\
-    """-o $PWD/subsampled_seqs.fna """))
+    """%prog -i $PWD/seqs.fastq -b $PWD/seqs_barcodes.fastq -p 0.05 """ +\
+    """-o $PWD/subsampled_seqs.fastq -u $PWD/barcodes_subsampled.fastq"""))
 script_info['output_description']=""""""
 script_info['required_options']=[
     make_option('-i', '--input_fp', type='existing_filepath',
