@@ -32,4 +32,4 @@ if __name__ == '__main__':
     results_dir = opts.input_dir
     output_dir = opts.output_dir
 
-    process_benchmark_results(input_dir, output_dir)
+    process_benchmark_results(results_dir, output_dir)
