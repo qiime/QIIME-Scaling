@@ -12,6 +12,8 @@ __status__ = "Development"
 from os import listdir, mkdir
 from os.path import join, isdir, exists
 import numpy as np
+from matplotlib import use
+use('Agg',warn=False)
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 

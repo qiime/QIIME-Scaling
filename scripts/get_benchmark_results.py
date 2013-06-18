@@ -10,7 +10,7 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 from scaling.option_parsing import parse_command_line_parameters, make_option
-from scaling.process_results import process_benchmark_resultspr
+from scaling.process_results import process_benchmark_results
 
 script_info = {}
 script_info['brief_description'] = """"""
@@ -32,4 +32,4 @@ if __name__ == '__main__':
     results_dir = opts.input_dir
     output_dir = opts.output_dir
 
-    process_benchmark_results(input_dir, output_dir)
+    process_benchmark_results(results_dir, output_dir)
