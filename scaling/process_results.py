@@ -260,7 +260,6 @@ def make_plots(data, output_dir, log_file):
     plt.close()
     log_file.write("Generating time plot finished\n")
 
-
     # Generate lineal time plot
     log_file.write("Generating lineal time plot... \n")
     # Perform curve fitting against the wall time data
@@ -282,7 +281,6 @@ def make_plots(data, output_dir, log_file):
     plt.savefig(time_lineal_fp)
     plt.close()
     log_file.write("Generating lineal time plot finished\n")
-
 
     # Generate memory plot
     log_file.write("Generating memory plot... \n")
@@ -327,11 +325,6 @@ def make_plots(data, output_dir, log_file):
     plt.savefig(mem_lineal_fp)
     plt.close()
     log_file.write("Generating lineal memory plot finished\n")
-
-
-
-
-
 
 
 def process_benchmark_results(input_dir, output_dir):
