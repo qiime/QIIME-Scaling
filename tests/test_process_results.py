@@ -16,7 +16,7 @@ from os.path import dirname, abspath, join, exists
 from shutil import rmtree
 import numpy as np
 from string import digits
-from scaling.process_results import (process_timing_directory,
+from scaling.process_results import (process_timing_directory, natural_sort,
     write_summarized_results, compute_rsquare, curve_fitting,
     generate_poly_label, make_plots, process_benchmark_results)
 
@@ -63,6 +63,14 @@ class TestProcessResults(TestCase):
             text - the string to remove digits from
         """
         return text.translate(None, digits)
+
+    def test_natural_sort(self):
+        """Tests natural_sort performs natural sort correctly"""
+        l = ['100_b','10_bb','100_a','20_aa','500_c', '9_c']
+        exp =['9_c','10_bb','20_aa','100_a','100_b','500_c']
+        obs = natural_sort(l)
+
+        self.assertEqual(obs, exp)
 
     def test_process_timing_directory_correct(self):
         """Tests process_timing_directory with a correct directory"""
@@ -146,9 +154,7 @@ class TestProcessResults(TestCase):
         obs_poly, obs_deg = curve_fitting(x, y)
         exp_poly = np.array([5.0, 50.0])
         exp_deg = 1
-        self.assertFloatEqual(obs_poly
-            , exp_poly
-        )
+        self.assertFloatEqual(obs_poly, exp_poly)
         self.assertEqual(obs_deg, exp_deg)
         # Quadratic test: y = 3*x^2 - 5*x + 2
         y = np.array([29502, 119002, 268502, 478002,747502])
@@ -162,6 +168,13 @@ class TestProcessResults(TestCase):
         obs_poly, obs_deg = curve_fitting(x, y)
         exp_poly = np.array([1.0, -5.0, -10.0, 500.0])
         exp_deg = 3
+        self.assertFloatEqual(obs_poly, exp_poly)
+        self.assertEqual(obs_deg, exp_deg)
+        # Test with linear = True
+        y = np.array([550, 1050.00005, 1550, 2049.99995, 2550])
+        obs_poly, obs_deg = curve_fitting(x, y, lineal=True)
+        exp_poly = np.array([5.0, 50.0])
+        exp_deg = 1
         self.assertFloatEqual(obs_poly, exp_poly)
         self.assertEqual(obs_deg, exp_deg)
 
@@ -180,8 +193,7 @@ class TestProcessResults(TestCase):
         exp = "3.0*x^2 + -5.0*x^1 + 2.0"
         self.assertEqual(obs, exp)
         # Cubic test: y = x^3 - 5x^2 - 10x + 500
-        poly = np.array([1.0, -5.0, -10.0, 500.0
-            ])
+        poly = np.array([1.0, -5.0, -10.0, 500.0])
         deg = 3
         obs = generate_poly_label(poly, deg)
         exp = "1.0*x^3 + -5.0*x^2 + -10.0*x^1 + 500.0"
@@ -189,16 +201,19 @@ class TestProcessResults(TestCase):
 
     def test_make_plots(self):
         """Tests make_plots generates plots in the correct place"""
-        time_fp = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='.png')
-        mem_fp = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='.png')
+        out_dir = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='')
+        mkdir(out_dir)
         log_fp = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='.txt')
         log_file = open(log_fp, 'w')
-        self._paths_to_clean_up = [time_fp, mem_fp, log_fp]
-        make_plots(self.data, time_fp, mem_fp, log_file)
+        self._dirs_to_clean_up = [out_dir]
+        self._paths_to_clean_up = [log_fp]
+        make_plots(self.data, out_dir, log_file)
         log_file.close()
         # Check the plots exists
-        self.assertTrue(exists(time_fp))
-        self.assertTrue(exists(mem_fp))
+        self.assertTrue(exists(join(out_dir, 'time_plot.png')))
+        self.assertTrue(exists(join(out_dir, 'memory_plot.png')))
+        self.assertTrue(exists(join(out_dir, 'time_plot_lin.png')))
+        self.assertTrue(exists(join(out_dir, 'memory_plot_lin.png')))
         # Check the contents of the log file
         f = open(log_fp)
         obs = f.readlines()
@@ -215,10 +230,14 @@ class TestProcessResults(TestCase):
         log_fp = join(out_dir, 'get_benchmark_results_log.txt')
         time_fp = join(out_dir, 'time_plot.png')
         mem_fp = join(out_dir, 'memory_plot.png')
+        time_lin_fp = join(out_dir, 'time_plot_lin.png')
+        mem_lin_fp = join(out_dir, 'memory_plot_lin.png')
         summ_fp = join(out_dir, 'summarized_results.txt')
         self.assertTrue(exists(log_fp))
         self.assertTrue(exists(time_fp))
         self.assertTrue(exists(mem_fp))
+        self.assertTrue(exists(time_lin_fp))
+        self.assertTrue(exists(mem_lin_fp))
         self.assertTrue(exists(summ_fp))
 
 exp_log_process_timing_dir = """File %s/20/5.txt not used: the command didn't finish correctly\n"""
@@ -234,9 +253,15 @@ exp_write_summarized_results = """#label\twall_mean\twall_std\tuser_mean\tuser_s
 exp_log_make_plots = """Generating time plot... 
 Best fit: .*x^ + .e-
 Generating time plot finished
+Generating lineal time plot... 
+Best fit: .*x^ + .e-
+Generating lineal time plot finished
 Generating memory plot... 
 Best fit: .*x^ + .e-
 Generating memory plot finished
+Generating lineal memory plot... 
+Best fit: .*x^ + .e-
+Generating lineal memory plot finished
 """
 
 if __name__ == '__main__':

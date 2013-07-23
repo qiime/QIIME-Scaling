@@ -21,8 +21,9 @@ import re
 
 def natural_sort( l ): 
     """ Sort the given list in the way that humans expect.
-        Code from:
-            http://www.codinghorror.com/blog/2007/12/sorting-for-humans-natural-sort-order.html
+        Code adapted from:
+            http://www.codinghorror.com/blog/2007/12/
+                sorting-for-humans-natural-sort-order.html
     """ 
     convert = lambda text: int(text) if text.isdigit() else text 
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
@@ -261,7 +262,7 @@ def make_plots(data, output_dir, log_file):
 
 
     # Generate lineal time plot
-    log_file.write("Generating time plot... \n")
+    log_file.write("Generating lineal time plot... \n")
     # Perform curve fitting against the wall time data
     poly, deg = curve_fitting(x, data['wall_time'][0], lineal=True)
     poly_label = generate_poly_label(poly, deg)
@@ -280,7 +281,7 @@ def make_plots(data, output_dir, log_file):
     plt.ylabel('Time (seconds)')
     plt.savefig(time_lineal_fp)
     plt.close()
-    log_file.write("Generating time plot finished\n")
+    log_file.write("Generating lineal time plot finished\n")
 
 
     # Generate memory plot
@@ -306,7 +307,7 @@ def make_plots(data, output_dir, log_file):
     log_file.write("Generating memory plot finished\n")
 
     # Generate memory plot
-    log_file.write("Generating memory plot... \n")
+    log_file.write("Generating lineal memory plot... \n")
     # Perform curve fitting against memory data
     poly, deg = curve_fitting(x, data['memory'][0], lineal=True)
     poly_label = generate_poly_label(poly, deg)
@@ -325,7 +326,7 @@ def make_plots(data, output_dir, log_file):
     plt.ylabel('Memory (GB)')
     plt.savefig(mem_lineal_fp)
     plt.close()
-    log_file.write("Generating memory plot finished\n")
+    log_file.write("Generating lineal memory plot finished\n")
 
 
 
