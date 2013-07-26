@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     parameters = opts.parameters
     input_dirs = opts.input_dirs
-    var_opts = opts.in_opts.split(',')
+    var_opts = opts.in_opts.split(',') if opts.in_opts else None
 
     pbs_fp = opts.output_fp
     out_opt = opts.out_opt
@@ -77,9 +77,11 @@ if __name__ == '__main__':
     num_reps = opts.num_reps
     force = opts.force
 
-    if len(var_opts) != len(input_dirs):
-        option_parser.error("The options --input_dirs and --in_opts must have "
-            "the same number of elements.")
+
+    if var_opts and input_dirs:
+        if len(var_opts) != len(input_dirs):
+            option_parser.error("The options --input_dirs and --in_opts must have "
+                "the same number of elements.")
 
     if not parameters and not input_dirs:
         option_parser.error("One of the options --parameters or --input_dirs "
