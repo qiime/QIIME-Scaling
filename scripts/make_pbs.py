@@ -10,7 +10,8 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 from scaling.option_parsing import parse_command_line_parameters, make_option
-from scaling.make_pbs import make_pbs_file
+from scaling.make_pbs import make_pbs
+from os import makedirs
 
 script_info = {}
 script_info['brief_description'] = "Generates a PBS file for benchmark purposes"
@@ -31,15 +32,17 @@ script_info['output_description'] = "A PBS file for submitting the benchmark"+\
 script_info['required_options'] = [
     make_option('-c', '--command', type='string',
         help='Command to benchmark.'),
-    make_option('-i', '--input_dirs', type='existing_dirpaths',
-        help='Comma-separated list of paths to the directories that contain '+\
-            'the benchmark files. Should be in the same order as --in_opts'),
-    make_option('--in_opts', type='string',
-        help='Comma-separated list of options used for providing the '+\
-            'benchmark files to the command. Should be in the same order as' +\
-            '--input_dirs')
     ]
 script_info['optional_options'] = [
+    make_option('-p', '--parameters', type='existing_filepath', default=None,
+        help='Parameters file with the parameter values to test'),
+    make_option('-i', '--input_dirs', type='existing_dirpaths', default=None,
+        help='Comma-separated list of paths to the directories that contain '+\
+            'the benchmark files. Should be in the same order as --in_opts'),
+    make_option('--in_opts', type='string', default=None,
+        help='Comma-separated list of options used for providing the '+\
+            'benchmark files to the command. Should be in the same order as' +\
+            '--input_dirs'),
     make_option('-o', '--output_fp', type='new_filepath',
         default='./submit_bench.pbs',
         help='The output PBS file path. [default: %default]'),
@@ -62,8 +65,10 @@ script_info['version'] = __version__
 if __name__ == '__main__':
     option_parser, opts, args = parse_command_line_parameters(**script_info)
     command = opts.command
+
+    parameters = opts.parameters
     input_dirs = opts.input_dirs
-    var_opts = opts.in_opts.split(',')
+    var_opts = opts.in_opts.split(',') if opts.in_opts else None
 
     pbs_fp = opts.output_fp
     out_opt = opts.out_opt
@@ -72,9 +77,28 @@ if __name__ == '__main__':
     num_reps = opts.num_reps
     force = opts.force
 
-    if len(var_opts) != len(input_dirs):
-        raise ValueError, "The options --i and --in_opts must have the same " +\
-            "number of elements."
 
-    make_pbs_file(command, var_opts, input_dirs, out_opt, bench_dir, pbs_fp,
-        name, num_reps, force)
+    if var_opts and input_dirs:
+        if len(var_opts) != len(input_dirs):
+            option_parser.error("The options --input_dirs and --in_opts must have "
+                "the same number of elements.")
+
+    if not parameters and not input_dirs:
+        option_parser.error("One of the options --parameters or --input_dirs "
+            "must be provided.")
+
+    if parameters and input_dirs:
+        option_parser.error("Only one of the options --parameters or "
+            "--input_dirs must be provided.")
+
+    try:
+        makedirs(bench_dir)
+    except OSError:
+        if force:
+            pass
+        else:
+            option_parser.error("Output directory already exists. Please "
+                "choose a different directory, or force overwrite with -f.")
+
+    make_pbs(command, var_opts, input_dirs, parameters, out_opt, bench_dir,
+        pbs_fp, name, num_reps)
