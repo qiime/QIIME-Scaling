@@ -17,6 +17,19 @@ use('Agg',warn=False)
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
+import re 
+
+def natural_sort( l ): 
+    """ Sort the given list in the way that humans expect.
+        Code adapted from:
+            http://www.codinghorror.com/blog/2007/12/
+                sorting-for-humans-natural-sort-order.html
+    """ 
+    convert = lambda text: int(text) if text.isdigit() else text 
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    l.sort( key=alphanum_key )
+    return l
+
 def process_timing_directory(timing_dir, log_file):
     """Retrieves the timing results stored in timing_dir
 
@@ -46,7 +59,7 @@ def process_timing_directory(timing_dir, log_file):
 
     # listdir returns the contents in an arbitrary order - sort them
     dirlist = listdir(timing_dir)
-    dirlist = sorted(dirlist)
+    dirlist = natural_sort(dirlist)
     # Loop over the contents of timing_dir
     for dirname in dirlist:
         # Get the path to the current content
@@ -160,7 +173,7 @@ def compute_rsquare(y, SSerr):
 
     return rsquare
 
-def curve_fitting(x, y):
+def curve_fitting(x, y, lineal=False):
     """Fits a polynomial curve to the data points defined by x and y
 
     Input:
@@ -176,6 +189,8 @@ def curve_fitting(x, y):
         deg += 1
         poly, SSerr, rank, sin, rc = np.polyfit(x, y, deg, full=True)
         if len(SSerr) == 0:
+            break
+	if lineal:
             break
         rsquare = compute_rsquare(y, SSerr)
 
@@ -194,7 +209,7 @@ def generate_poly_label(poly, deg):
     s += str(poly[deg])
     return s
 
-def make_plots(data, time_fp, mem_fp, log_file):
+def make_plots(data, output_dir, log_file):
     """Generates the plots with the benchmark results present in data
 
     Input:
@@ -208,12 +223,19 @@ def make_plots(data, time_fp, mem_fp, log_file):
     wall time mean curve. It also generates a plot with the memory usage results
     with the best fitted function too.
     """
+
+    time_fp = join(output_dir, 'time_plot.png')
+    mem_fp = join(output_dir, 'memory_plot.png')
+
+    time_lineal_fp = join(output_dir, 'time_plot_lin.png')
+    mem_lineal_fp = join(output_dir, 'memory_plot_lin.png')
+
     # Get the x axis data
     x = data['label']
     # For the function resulted from curve fitting, we use an extended x axis,
     # so the trend line is more clear
     interval = x[1] - x[0]
-    x2 = np.arange(x[0] - interval, x[-1] + interval)
+    x2 = np.arange(x[0] - interval, x[-1] + 2*interval)
 
     # Generate time plot
     log_file.write("Generating time plot... \n")
@@ -238,6 +260,28 @@ def make_plots(data, time_fp, mem_fp, log_file):
     plt.close()
     log_file.write("Generating time plot finished\n")
 
+    # Generate lineal time plot
+    log_file.write("Generating lineal time plot... \n")
+    # Perform curve fitting against the wall time data
+    poly, deg = curve_fitting(x, data['wall_time'][0], lineal=True)
+    poly_label = generate_poly_label(poly, deg)
+    y = np.polyval(poly, x2)
+    plt.plot(x2, y, 'k', label=poly_label)
+    log_file.write("Best fit: %s\n" % poly_label)
+    # Plot the wall, user and kernel times
+    for key in ['wall_time', 'cpu_user', 'cpu_kernel']:
+        y, y_err = data[key]
+        plt.errorbar(x, y, yerr=y_err, label=key)
+    fontP = FontProperties()
+    fontP.set_size('small')
+    plt.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
+    plt.title('Running time')
+    plt.xlabel('Input file')
+    plt.ylabel('Time (seconds)')
+    plt.savefig(time_lineal_fp)
+    plt.close()
+    log_file.write("Generating lineal time plot finished\n")
+
     # Generate memory plot
     log_file.write("Generating memory plot... \n")
     # Perform curve fitting against memory data
@@ -247,7 +291,6 @@ def make_plots(data, time_fp, mem_fp, log_file):
     y = y / (1024*1024)
     plt.plot(x2, y, 'k', label=poly_label)
     log_file.write("Best fit: %s\n" % poly_label)
-
     # Plot the memory data
     y, y_err = data['memory']
     y = np.array(y) / (1024*1024)
@@ -260,6 +303,29 @@ def make_plots(data, time_fp, mem_fp, log_file):
     plt.savefig(mem_fp)
     plt.close()
     log_file.write("Generating memory plot finished\n")
+
+    # Generate memory plot
+    log_file.write("Generating lineal memory plot... \n")
+    # Perform curve fitting against memory data
+    poly, deg = curve_fitting(x, data['memory'][0], lineal=True)
+    poly_label = generate_poly_label(poly, deg)
+    y = np.polyval(poly, x2)
+    y = y / (1024*1024)
+    plt.plot(x2, y, 'k', label=poly_label)
+    log_file.write("Best fit: %s\n" % poly_label)
+    # Plot the memory data
+    y, y_err = data['memory']
+    y = np.array(y) / (1024*1024)
+    y_err = np.array(y_err) / (1024*1024)
+    plt.errorbar(x, y, yerr=y_err, label='Memory')
+    plt.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
+    plt.title('Memory usage')
+    plt.xlabel('Input file')
+    plt.ylabel('Memory (GB)')
+    plt.savefig(mem_lineal_fp)
+    plt.close()
+    log_file.write("Generating lineal memory plot finished\n")
+
 
 def process_benchmark_results(input_dir, output_dir):
     """Processes the benchmark results stored in input_dir
@@ -287,6 +353,6 @@ def process_benchmark_results(input_dir, output_dir):
     log_file.write('Generating plots:\n')
     plot_time_fp = join(output_dir, 'time_plot.png')
     plot_mem_fp = join(output_dir, 'memory_plot.png')
-    make_plots(data, plot_time_fp, plot_mem_fp, log_file)
+    make_plots(data, output_dir, log_file)
     log_file.write('Generating plots finished\n')
     log_file.close()
