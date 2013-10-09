@@ -40,4 +40,4 @@ if __name__ == '__main__':
     if len(labels) != len(results_dirs):
         raise ValueError, "You should pass a label for each input directory"
 
-    compare_benchmark_results(results_dir, labels, output_dir)
+    compare_benchmark_results(results_dirs, labels, output_dir)
