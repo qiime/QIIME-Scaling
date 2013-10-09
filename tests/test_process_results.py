@@ -18,7 +18,8 @@ import numpy as np
 from string import digits
 from scaling.process_results import (process_timing_directory, natural_sort,
     write_summarized_results, compute_rsquare, curve_fitting,
-    generate_poly_label, make_plots, process_benchmark_results)
+    generate_poly_label, make_plots, process_benchmark_results,
+    make_comparison_plots, compare_benchmark_results)
 
 class TestProcessResults(TestCase):
     def setUp(self):
@@ -26,10 +27,12 @@ class TestProcessResults(TestCase):
         tests_dir = dirname(abspath(__file__))
         # Path to the test timing folder
         self.timing_dir = join(tests_dir, 'support_files/timing')
+        self.timing_dir_2 = join(tests_dir, 'support_files/timing_2')
+        self.timing_dir_bad = join(tests_dir, 'support_files/timing_bad')
         # Get QIIME's temp dir
         self.qiime_config = load_qiime_config()
         self.tmp_dir = self.qiime_config['temp_dir'] or '/tmp/'
-        # Test dictionary
+        # Test dictionaries
         self.data = {
             'label' : [100, 200, 300, 400, 500],
             'wall_time' : ([25, 50, 75, 100, 125],
@@ -37,6 +40,17 @@ class TestProcessResults(TestCase):
             'cpu_user' : ([23, 46, 70, 94, 123],
                             [0.9, 2, 2.9, 4.1, 5]),
             'cpu_kernel' : ([2, 4, 5, 6, 2],
+                [0.1, 0.0, 0.001, 0.2, 0.02]),
+            'memory' : ([1048576, 2097152, 3145728, 4194304, 5242880],
+                [0.0, 0.0, 0.0, 0.2, 0.0])
+        }
+        self.data2 = {
+            'label' : [100, 200, 300, 400, 500],
+            'wall_time' : ([30, 55, 80, 105, 130],
+                            [1, 2, 3, 4, 5]),
+            'cpu_user' : ([27, 50, 75, 98, 124],
+                            [0.9, 2, 2.9, 4.1, 5]),
+            'cpu_kernel' : ([3, 5, 5, 7, 6],
                 [0.1, 0.0, 0.001, 0.2, 0.02]),
             'memory' : ([1048576, 2097152, 3145728, 4194304, 5242880],
                 [0.0, 0.0, 0.0, 0.2, 0.0])
@@ -215,7 +229,7 @@ class TestProcessResults(TestCase):
         self.assertTrue(exists(join(out_dir, 'time_plot_lin.png')))
         self.assertTrue(exists(join(out_dir, 'memory_plot_lin.png')))
         # Check the contents of the log file
-        f = open(log_fp)
+        f = open(log_fp, 'U')
         obs = f.readlines()
         f.close()
         exp = exp_log_make_plots.splitlines(True)
@@ -240,6 +254,54 @@ class TestProcessResults(TestCase):
         self.assertTrue(exists(mem_lin_fp))
         self.assertTrue(exists(summ_fp))
 
+    def test_make_comparison_plots(self):
+        """Tests make_comparison_plots generates plots int he correct place"""
+        out_dir = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='')
+        mkdir(out_dir)
+        log_fp = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='.log')
+        log_file = open(log_fp, 'w')
+        self._dirs_to_clean_up = [out_dir]
+        self._paths_to_clean_up = [log_fp]
+        x_axis = self.data['label']
+        data_dict = {
+            'labelA': self.data,
+            'labelB': self.data2
+        }
+        make_comparison_plots(data_dict, x_axis, out_dir, log_file)
+        log_file.close()
+        # Check the plots exist
+        self.assertTrue(exists(join(out_dir, 'comp_time_plot.png')))
+        self.assertTrue(exists(join(out_dir, 'comp_mem_plot.png')))
+        # Check the contents of the log file
+        f = open(log_fp, 'U')
+        obs = f.readlines()
+        f.close()
+        exp = exp_log_compare_plots.splitlines(True)
+        self.assertEqual(obs, exp)
+
+    def test_compare_benchmark_results(self):
+        """Tests compare_benchmark_results"""
+        out_dir = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='')
+        self._dirs_to_clean_up = [out_dir]
+        path_list = [self.timing_dir, self.timing_dir_2]
+        labels = ['labelA', 'labelB']
+        compare_benchmark_results(path_list, labels, out_dir)
+        log_fp = join(out_dir, 'compare_bench_results.log')
+        time_fp = join(out_dir, 'comp_time_plot.png')
+        mem_fp = join(out_dir, 'comp_mem_plot.png')
+        self.assertTrue(exists(log_fp))
+        self.assertTrue(exists(time_fp))
+        self.assertTrue(exists(mem_fp))
+        # Test that raises a ValueError when the benchmarks have been run
+        # over a different benchmark set
+        out_dir = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='')
+        self._dirs_to_clean_up.append(out_dir)
+        path_list = [self.timing_dir, self.timing_dir_bad]
+        self.assertRaises(ValueError, compare_benchmark_results, path_list,
+            labels, out_dir)
+
+
+
 exp_log_process_timing_dir = """File %s/20/5.txt not used: the command didn't finish correctly\n"""
 
 exp_write_summarized_results = """#label\twall_mean\twall_std\tuser_mean\tuser_std\tkernel_mean\tkernel_std\tmem_mean\tmem_std
@@ -263,6 +325,13 @@ Generating lineal memory plot...
 Best fit: .*x^ + .e-
 Generating lineal memory plot finished
 """
+
+exp_log_compare_plots = """Generating time plot...
+Generating time plot finished
+Generating memory plot...
+Generating memory plot finished
+"""
+
 
 if __name__ == '__main__':
     main()
