@@ -134,18 +134,6 @@ class TestProcessResults(TestCase):
         self._dirs_to_clean_up = [dir_name]
         self.assertRaises(ValueError, process_timing_directory, dir_name, "")
 
-    def test_write_summarized_results(self):
-        """Tests write_summarized_results generates the correct file"""
-        filename = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='.txt')
-        self._paths_to_clean_up = [filename]
-        write_summarized_results(self.data, filename)
-        self.assertTrue(exists(filename))
-        f = open(filename, 'U')
-        obs = f.readlines()
-        f.close()
-        exp = exp_write_summarized_results.splitlines(True)
-        self.assertEqual(obs, exp)
-
     def test_compute_rsquare(self):
         """Tests compute_rsquare generates the correct answer"""
         y = np.array([15.0, 20.0, 25.0, 30.0, 35.0])
@@ -303,14 +291,6 @@ class TestProcessResults(TestCase):
 
 
 exp_log_process_timing_dir = """File %s/20/5.txt not used: the command didn't finish correctly\n"""
-
-exp_write_summarized_results = """#label\twall_mean\twall_std\tuser_mean\tuser_std\tkernel_mean\tkernel_std\tmem_mean\tmem_std
-100\t25\t1\t23\t0.9\t2\t0.1\t1048576\t0.0
-200\t50\t2\t46\t2\t4\t0.0\t2097152\t0.0
-300\t75\t3\t70\t2.9\t5\t0.001\t3145728\t0.0
-400\t100\t4\t94\t4.1\t6\t0.2\t4194304\t0.2
-500\t125\t5\t123\t5\t2\t0.02\t5242880\t0.0
-"""
 
 exp_log_make_plots = """Generating time plot... 
 Best fit: .*x^ + .e-
