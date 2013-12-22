@@ -29,13 +29,12 @@ def natural_sort( l ):
     l.sort( key=alphanum_key )
     return l
 
-def process_timing_directory(timing_dir, log_file):
+def process_timing_directory(timing_dir):
     """Retrieves the timing results stored in timing_dir
 
     Inputs:
         timing_dir: path to the directory containing the timing results. It
             should contain only directories
-        log_file: open file object for the log file
 
     Returns a dictionary with the following structure:
         {
@@ -88,8 +87,7 @@ def process_timing_directory(timing_dir, log_file):
             # means that the command didn't finish correctly. Add a note on the
             # log file to let the user know
             if len(info) != 4:
-                log_file.write("File %s not used: " % (filepath) + 
-                    "the command didn't finish correctly\n")
+                print "Warning - File %s not used: " % filepath
             else:
                 wall_time.append(float(info[0]))
                 cpu_user.append(float(info[1]))
@@ -140,7 +138,7 @@ def compute_rsquare(y, SSerr):
 
     return rsquare
 
-def curve_fitting(x, y, lineal=False):
+def curve_fitting(x, y):
     """Fits a polynomial curve to the data points defined by x and y
 
     Input:
@@ -156,8 +154,6 @@ def curve_fitting(x, y, lineal=False):
         deg += 1
         poly, SSerr, rank, sin, rc = np.polyfit(x, y, deg, full=True)
         if len(SSerr) == 0:
-            break
-	if lineal:
             break
         rsquare = compute_rsquare(y, SSerr)
 
@@ -208,7 +204,7 @@ def make_bench_plot(data, fit_key, keys, title, ylabel, scale=1):
         ax.errorbar(x, y, yerr=y_err, label=key)
     fontP = FontProperties()
     fontP.set_size('small')
-    figure.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
+    # figure.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
     figure.suptitle(title)
     ax.set_xlabel('Input file')
     ax.set_ylabel(ylabel)
@@ -222,7 +218,7 @@ def process_benchmark_results(input_dir):
     """
 
     # Retrieve the benchmark results
-    data = process_timing_directory(input_dir, log_file)
+    data = process_timing_directory(input_dir)
     # Generate the plot with the timing results
     fit_key = "wall_time"
     keys = ["wall_time", "cpu_user", "cpu_kernel"]
@@ -231,7 +227,7 @@ def process_benchmark_results(input_dir):
     # Generate the plot with the memory results
     fit_key = "memory"
     keys = ["memory"]
-    mem_plot, mem_poly = make_plot(data, fit_key, keys, "Memory usage",
+    mem_plot, mem_poly = make_bench_plot(data, fit_key, keys, "Memory usage",
                                     "Memory (GB)", scale=1024*1024)
     return data, time_plot, time_poly, mem_plot, mem_poly
 
