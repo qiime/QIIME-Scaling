@@ -15,9 +15,22 @@ from scaling.process_results import (natural_sort, process_timing_directory,
     compute_rsquare, curve_fitting, generate_poly_label, make_bench_plot,
     process_benchmark_results, make_comparison_plots, compare_benchmark_results)
 import os
+import sys
 from matplotlib.figure import Figure
 from shutil import rmtree
 import numpy as np
+from StringIO import StringIO
+
+class OutputRedirect:
+    """Class to redirect the standard output to a StringIO"""
+    saved_stdout = None
+    def __enter__(self):
+        saved_stdout = sys.stdout
+        out = StringIO()
+        sys.stdout = out
+        return out
+    def __exit__(self, type, value, tb):
+        sys.stdout = self.saved_stdout
 
 class TestProcessResults(TestCase):
     def setUp(self):
@@ -66,7 +79,10 @@ class TestProcessResults(TestCase):
 
     def test_process_timing_directory_correct(self):
         """Correctly retrieves the measurements from the timing directory"""
-        obs = process_timing_directory(self.timing_dir)
+        stdout_red = OutputRedirect()
+        with stdout_red as out:
+            obs = process_timing_directory(self.timing_dir)
+            obs_out = out.getvalue()
         exp = {
             'label' : [10.0, 20.0, 30.0, 40.0],
             'wall_time' : ([397.446, 797.59, 1203.004, 1617.564],
@@ -87,6 +103,9 @@ class TestProcessResults(TestCase):
                 self.assertAlmostEqual(o, e)
             for o, e in zip(obs[key][1], exp[key][1]):
                 self.assertAlmostEqual(o, e)
+        # Check the printed string
+        exp = "Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/support_files/timing/20/5.txt not used: \n"
+        self.assertEqual(obs_out, exp)
 
     def test_process_timing_directory_bad(self):
         """Raises error with a wrong directory structure"""
@@ -167,8 +186,12 @@ class TestProcessResults(TestCase):
 
     def test_process_benchmark_results(self):
         """Correctly processes the benchmark results"""
-        data, time_fig, time_str, mem_fig, mem_str = \
+        stdout_red = OutputRedirect()
+        with stdout_red as out:
+            data, time_fig, time_str, mem_fig, mem_str = \
                                     process_benchmark_results(self.timing_dir)
+            obs_out = out.getvalue()
+
         exp_data = {
             'label' : [10.0, 20.0, 30.0, 40.0],
             'wall_time' : ([397.446, 797.59, 1203.004, 1617.564],
@@ -194,6 +217,10 @@ class TestProcessResults(TestCase):
         self.assertEqual(time_str, "40.65768*x^1 + -12.541")
         self.assertEqual(mem_fig.__class__, Figure)
         self.assertEqual(mem_str, "864455.776*x^1 + 1260592.0")
+
+        # Check the printed string
+        exp = "Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/support_files/timing/20/5.txt not used: \n"
+        self.assertEqual(obs_out, exp)
 
     def test_make_comparison_plots(self):
         """Tests make_comparison_plots generates plots int he correct place"""
