@@ -87,7 +87,7 @@ def process_timing_directory(timing_dir):
             # means that the command didn't finish correctly. Add a note on the
             # log file to let the user know
             if len(info) != 4:
-                print "Warning - File %s not used: " % filepath
+                print "Warning - File %s not used:" % filepath
             else:
                 wall_time.append(float(info[0]))
                 cpu_user.append(float(info[1]))

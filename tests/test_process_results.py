@@ -3,8 +3,8 @@
 __author__ = "Jose Antonio Navas Molina"
 __copyright__ = "Copyright 2013, The QIIME Scaling Project"
 __credits__ = ["Jose Antonio Navas Molina"]
-__license__ = "GPL"
-__version__ = "0.0.1-dev"
+__license__ = "BSD"
+__version__ = "0.0.2-dev"
 __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
@@ -29,7 +29,8 @@ class TestProcessResults(TestCase):
         # Path to the test timing folder
         self.timing_dir = os.path.join(tests_dir, 'support_files/timing')
         self.timing_dir_2 = os.path.join(tests_dir, 'support_files/timing_2')
-        self.timing_dir_bad = os.path.join(tests_dir, 'support_files/timing_bad')
+        self.timing_dir_bad = os.path.join(tests_dir,
+                                            'support_files/timing_bad')
         # Test dictionaries
         self.data = {
             'label' : [100, 200, 300, 400, 500],
@@ -80,7 +81,8 @@ class TestProcessResults(TestCase):
             'cpu_kernel' : ([6.678, 13.544, 19.608, 25.89],
                         [2.336522202, 4.317965262, 6.659373544, 7.725679258]),
             'memory' : ([9710547.2, 18743296, 27390896, 35643206.4],
-                        [92.9653699, 1068.531702852, 2554.55420768, 3185.4967336])
+                        [92.9653699, 1068.531702852, 2554.55420768,
+                            3185.4967336])
         }
         # Check the contents of the observed dictionary
         self.assertEqual(obs.keys(), exp.keys())
@@ -92,7 +94,8 @@ class TestProcessResults(TestCase):
             for o, e in zip(obs[key][1], exp[key][1]):
                 self.assertAlmostEqual(o, e)
         # Check the printed string
-        exp = "Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/support_files/timing/20/5.txt not used: \n"
+        exp = ("Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/"
+            "support_files/timing/20/5.txt not used:\n")
         self.assertEqual(obs_out, exp)
 
     def test_process_timing_directory_bad(self):
@@ -189,7 +192,8 @@ class TestProcessResults(TestCase):
             'cpu_kernel' : ([6.678, 13.544, 19.608, 25.89],
                         [2.336522202, 4.317965262, 6.659373544, 7.725679258]),
             'memory' : ([9710547.2, 18743296, 27390896, 35643206.4],
-                        [92.9653699, 1068.531702852, 2554.55420768, 3185.4967336])
+                        [92.9653699, 1068.531702852, 2554.55420768,
+                            3185.4967336])
         }
         # Check the contents of the observed dictionary
         self.assertEqual(data.keys(), exp_data.keys())
@@ -207,7 +211,8 @@ class TestProcessResults(TestCase):
         self.assertEqual(mem_str, "864455.776*x^1 + 1260592.0")
 
         # Check the printed string
-        exp = "Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/support_files/timing/20/5.txt not used: \n"
+        exp = ("Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/"
+            "support_files/timing/20/5.txt not used:\n")
         self.assertEqual(obs_out, exp)
 
     def test_make_comparison_plots(self):
