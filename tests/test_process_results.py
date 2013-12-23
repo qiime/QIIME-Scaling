@@ -15,22 +15,10 @@ from scaling.process_results import (natural_sort, process_timing_directory,
     compute_rsquare, curve_fitting, generate_poly_label, make_bench_plot,
     process_benchmark_results, make_comparison_plots, compare_benchmark_results)
 import os
-import sys
 from matplotlib.figure import Figure
 from shutil import rmtree
 import numpy as np
-from StringIO import StringIO
-
-class OutputRedirect:
-    """Class to redirect the standard output to a StringIO"""
-    saved_stdout = None
-    def __enter__(self):
-        saved_stdout = sys.stdout
-        out = StringIO()
-        sys.stdout = out
-        return out
-    def __exit__(self, type, value, tb):
-        sys.stdout = self.saved_stdout
+from scaling.util import OutputRedirect
 
 class TestProcessResults(TestCase):
     def setUp(self):
