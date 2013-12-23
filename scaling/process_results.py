@@ -231,88 +231,57 @@ def process_benchmark_results(input_dir):
                                     "Memory (GB)", scale=1024*1024)
     return data, time_plot, time_poly, mem_plot, mem_poly
 
-def make_comparison_plots(data, x_axis, output_dir, log_file):
+def make_comparison_plot(data, x_axis, key, title, ylabel, scale=1):
     """Generates the plots comparing the benchmark results listed in data
 
     Input:
         data: a dictionary where keys are the labels for the benchmarks
             and the values are dictionaries containing the benchmark results
             (see process_timing_directory)
-        output_dir: path to the output directory
-        log_file: open file object for the log file
+        x_axis:
+        key:
+        scale:
     """
-    time_fp = join(output_dir, 'comp_time_plot.png')
-    mem_fp = join(output_dir, 'comp_mem_plot.png')
-    # Generate time plot
-    log_file.write("Generating time plot...\n")
-    # Plot the wall times
+    figure = plt.figure()
+    ax = figure.add_subplot(111)
     for d in data:
-        y, y_err = data[d]['wall_time']
-        plt.errorbar(x_axis, y, yerr=y_err, label=d)
-    fontP = FontProperties()
-    fontP.set_size('small')
-    plt.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
-    plt.title('Running time')
-    plt.xlabel('Test cases')
-    plt.ylabel('Time (seconds)')
-    plt.savefig(time_fp)
-    plt.close()
-    log_file.write("Generating time plot finished\n")
-    # Generate the memory plot
-    log_file.write("Generating memory plot...\n")
-    for d in data:
-        y, y_err = data[d]['memory']
-        y = np.array(y) / (1024*1024)
-        y_err = np.array(y_err) / (1024*1024)
-        plt.errorbar(x_axis, y, yerr=y_err, label=d)
-    fontP = FontProperties()
-    fontP.set_size('small')
-    plt.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
-    plt.title('Memory usage')
-    plt.xlabel('Test cases')
-    plt.ylabel('Memory (GB)')
-    plt.savefig(mem_fp)
-    plt.close()
-    log_file.write("Generating memory plot finished\n")
+        y, y_err = data[d][key]
+        y = np.array(y) / scale
+        y_err = np.array(y_err) / scale
+        ax.errorbar(x_axis, y, yerr=y_err, label=d)
+    figure.suptitle(title)
+    ax.set_xlabel('Input file')
+    ax.set_ylabel(ylabel)
+    return figure
 
-def compare_benchmark_results(input_dirs, labels, output_dir):
+def compare_benchmark_results(input_dirs, labels):
     """Compares in a single plot the benchmark results listed in input_dirs
 
     Inputs:
         input_dirs: list of paths to the directories containing the timing
             results
         labels: list of strings to label the plot data series
-        output_dir: path to the output directory
 
-    Note: raises a ValueError if all the benchmark results doesn't have the same
-        number of test cases
+    Note: raises a ValueError if all the benchmark results doesn't belong to the
+        same bench suite
     """
-    # Crete the output directory if it doesn't exists
-    if not exists(output_dir):
-        mkdir(output_dir)
-    # Prepare the log file:
-    log_fp = join(output_dir, 'compare_bench_results.log')
-    log_file = open(log_fp, 'w')
-    # Retrieve the benchmark results
+    # Get the benchmark results
     data = {}
-    log_file.write("Retrieving benchmark results:\n")
-    x_axis = None
     for in_dir, label in zip(input_dirs, labels):
-        log_file.write("\t%s... \n" % in_dir)
-        d = process_timing_directory(in_dir, log_file)
+        d = process_timing_directory(in_dir)
+        data[label] = d
+    # Check that all the provided results correspond to the same bench suite
+    x_axis = None
+    for l, d in data.iteritems():
         if x_axis is None:
             x_axis = d['label']
         else:
-            for x, y in zip(x_axis, d['label']):
-                if x != y:
-                    raise ValueError, "In order to compare different " +\
-                        "benchmark results, they should be over the same set "+\
-                        "of test cases"
-        data[label] = d
-        log_file.write("\t...%s Done \n" % in_dir)
-    log_file.write('Retrieving benchmark results finished\n')
+            if set(x_axis) != set(d['label']):
+                raise ValueError("In order to compare different benchmark "
+                    "results, they should be over the same set of test cases")
     # Generate comparison plots
-    log_file.write('Generating plots:\n')
-    make_comparison_plots(data, x_axis, output_dir, log_file)
-    log_file.write('Generating plots finished\n')
-    log_file.close()
+    time_fig = make_comparison_plot(data, x_axis, 'wall_time', 'Running time',
+                                    'Time (seconds)')
+    mem_fig = make_comparison_plot(data, x_axis, 'memory', 'Memory usage', 
+                                   'Memory (GB)', scale=1024*1024)
+    return time_fig, mem_fig

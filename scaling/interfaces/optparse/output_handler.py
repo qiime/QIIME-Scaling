@@ -77,5 +77,9 @@ def write_string_to_dir(result_key, data, option_value=None):
         raise IncompetentDeveloperError("Cannot write output without an "
                                         "output directory.")
 
+    if os.path.exists(option_value) and os.path.isfile(option_value):
+        raise IOError("Output directory '%s' already exists and it is a file."
+                      % option_value)
+
     output_fp = os.path.join(option_value, "%s.txt" % result_key)
     write_string(result_key, data, option_value=output_fp)

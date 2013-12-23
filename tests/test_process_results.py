@@ -13,7 +13,7 @@ from unittest import TestCase, main
 from tempfile import mkdtemp
 from scaling.process_results import (natural_sort, process_timing_directory,
     compute_rsquare, curve_fitting, generate_poly_label, make_bench_plot,
-    process_benchmark_results, make_comparison_plots, compare_benchmark_results)
+    process_benchmark_results, make_comparison_plot, compare_benchmark_results)
 import os
 from matplotlib.figure import Figure
 from shutil import rmtree
@@ -54,6 +54,8 @@ class TestProcessResults(TestCase):
             'memory' : ([1048576, 2097152, 3145728, 4194304, 5242880],
                 [0.0, 0.0, 0.0, 0.2, 0.0])
         }
+        self.comp_data = {'foo' : self.data,
+                          'bar' : self.data2}
 
     def tearDown(self):
         rmtree(self.output_dir)
@@ -94,8 +96,7 @@ class TestProcessResults(TestCase):
             for o, e in zip(obs[key][1], exp[key][1]):
                 self.assertAlmostEqual(o, e)
         # Check the printed string
-        exp = ("Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/"
-            "support_files/timing/20/5.txt not used:\n")
+        exp = "Warning - File %s/20/5.txt not used:\n" % self.timing_dir
         self.assertEqual(obs_out, exp)
 
     def test_process_timing_directory_bad(self):
@@ -211,57 +212,37 @@ class TestProcessResults(TestCase):
         self.assertEqual(mem_str, "864455.776*x^1 + 1260592.0")
 
         # Check the printed string
-        exp = ("Warning - File /Users/jose/qiime_software/QIIME-Scaling/tests/"
-            "support_files/timing/20/5.txt not used:\n")
+        exp = "Warning - File %s/20/5.txt not used:\n" % self.timing_dir
         self.assertEqual(obs_out, exp)
 
-    def test_make_comparison_plots(self):
-        """Tests make_comparison_plots generates plots int he correct place"""
-        # out_dir = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='')
-        # mkdir(out_dir)
-        # log_fp = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='.log')
-        # log_file = open(log_fp, 'w')
-        # self._dirs_to_clean_up = [out_dir]
-        # self._paths_to_clean_up = [log_fp]
-        # x_axis = self.data['label']
-        # data_dict = {
-        #     'labelA': self.data,
-        #     'labelB': self.data2
-        # }
-        # make_comparison_plots(data_dict, x_axis, out_dir, log_file)
-        # log_file.close()
-        # # Check the plots exist
-        # self.assertTrue(exists(join(out_dir, 'comp_time_plot.png')))
-        # self.assertTrue(exists(join(out_dir, 'comp_mem_plot.png')))
-        # # Check the contents of the log file
-        # f = open(log_fp, 'U')
-        # obs = f.readlines()
-        # f.close()
-        # exp = exp_log_compare_plots.splitlines(True)
-        # self.assertEqual(obs, exp)
-        pass
+    def test_make_comparison_plot(self):
+        """Correctly generates a comparison plot"""
+        obs = make_comparison_plot(self.comp_data, self.data['label'],
+                                   'wall_time', 'foo', 'bar')
+        self.assertEqual(obs.__class__, Figure)
 
     def test_compare_benchmark_results(self):
-        """Tests compare_benchmark_results"""
-        # out_dir = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='')
-        # self._dirs_to_clean_up = [out_dir]
-        # path_list = [self.timing_dir, self.timing_dir_2]
-        # labels = ['labelA', 'labelB']
-        # compare_benchmark_results(path_list, labels, out_dir)
-        # log_fp = join(out_dir, 'compare_bench_results.log')
-        # time_fp = join(out_dir, 'comp_time_plot.png')
-        # mem_fp = join(out_dir, 'comp_mem_plot.png')
-        # self.assertTrue(exists(log_fp))
-        # self.assertTrue(exists(time_fp))
-        # self.assertTrue(exists(mem_fp))
-        # # Test that raises a ValueError when the benchmarks have been run
-        # # over a different benchmark set
-        # out_dir = get_tmp_filename(tmp_dir=self.tmp_dir, suffix='')
-        # self._dirs_to_clean_up.append(out_dir)
-        # path_list = [self.timing_dir, self.timing_dir_bad]
-        # self.assertRaises(ValueError, compare_benchmark_results, path_list,
-        #     labels, out_dir)
-        pass
+        """Correctly generates comparison plots"""
+        input_dirs = [self.timing_dir, self.timing_dir_2]
+        labels = ['foo', 'bar']
+        stdout_red = OutputRedirect()
+        with stdout_red as out:
+            time_fig, mem_fig = compare_benchmark_results(input_dirs, labels)
+            obs_out = out.getvalue()
+        self.assertEqual(time_fig.__class__, Figure)
+        self.assertEqual(mem_fig.__class__, Figure)
+        exp = ("Warning - File %s/20/5.txt not used:\nWarning - File "
+            "%s/20/5.txt not used:\n" % (self.timing_dir, self.timing_dir_2))
+        self.assertEqual(obs_out, exp)
+
+    def test_compare_bencmark_results_error(self):
+        """Correctly handles erroneous timing folders"""
+        input_dirs = [self.timing_dir, self.timing_dir_bad]
+        labels = ['foo', 'bar']
+        stdout_red = OutputRedirect()
+        with stdout_red as out:
+            self.assertRaises(ValueError, compare_benchmark_results, input_dirs,
+                              labels)
 
 if __name__ == '__main__':
     main()

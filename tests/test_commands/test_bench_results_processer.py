@@ -9,7 +9,6 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 
 from unittest import TestCase, main
-from pyqi.core.exception import CommandError
 from scaling.commands.bench_results_processer import BenchResultsProcesser
 from scaling.util import OutputRedirect
 from matplotlib.figure import Figure

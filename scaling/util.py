@@ -16,7 +16,7 @@ class OutputRedirect:
     """Class to redirect the standard output to a StringIO"""
     saved_stdout = None
     def __enter__(self):
-        saved_stdout = sys.stdout
+        self.saved_stdout = sys.stdout
         out = StringIO()
         sys.stdout = out
         return out
