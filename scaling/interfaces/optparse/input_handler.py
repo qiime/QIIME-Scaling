@@ -7,6 +7,7 @@ __license__ = "BSD"
 __version__ = "0.0.2-dev"
 __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
+__status__ = "Development"
 
 from os import listdir
 from os.path import abspath, join
