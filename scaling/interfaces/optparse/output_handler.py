@@ -13,6 +13,7 @@ from pyqi.core.exception import IncompetentDeveloperError
 from pyqi.core.interfaces.optparse.output_handler import (write_list_of_strings,
                                                           write_string)
 import os
+import numpy as np
 
 def write_summarized_results(result_key, data, option_value=None):
     """Write the benchmark results in a tab-delimited format
