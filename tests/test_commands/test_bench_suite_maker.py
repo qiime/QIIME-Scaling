@@ -144,7 +144,7 @@ do
 done
 
 # Get the benchmark results and produce the plots
-get_benchmark_results.py -i $timing_dest/ -o $dest/plots/
+scaling process-bench-results -i $timing_dest/ -o $dest/plots/
 """
 
 multiple_file_suite = """#!/bin/bash
@@ -189,7 +189,7 @@ do
 done
 
 # Get the benchmark results and produce the plots
-get_benchmark_results.py -i $timing_dest/ -o $dest/plots/
+scaling process-bench-results -i $timing_dest/ -o $dest/plots/
 """
 
 single_parameter_suite = """#!/bin/bash
@@ -237,7 +237,7 @@ done
 
 # Get the benchmark results and produce the plots
 mkdir $dest/plots
-get_benchmark_results.py -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
+scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
 """
 
 multiple_parameter_suite = """#!/bin/bash
@@ -296,8 +296,8 @@ done
 
 # Get the benchmark results and produce the plots
 mkdir $dest/plots
-get_benchmark_results.py -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
-get_benchmark_results.py -i $timing_dest/similarity -o $dest/plots/similarity
+scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
+scaling process-bench-results -i $timing_dest/similarity -o $dest/plots/similarity
 """
 
 if __name__ == '__main__':

@@ -60,8 +60,7 @@ class BenchResultsProcesserTests(TestCase):
         self.assertEqual(obs['mem_fig'].__class__, Figure)
         self.assertEqual(obs['mem_str'], "864455.776*x^1 + 1260592.0")
         # Check the standard output
-        exp_stdout = ("Warning - File /Users/jose/qiime_software/QIIME-Scaling"
-            "/tests/test_commands/../support_files/timing/20/5.txt not used:\n")
+        exp_stdout = "Warning - File %s/20/5.txt not used:\n" % self.timing_dir
         self.assertEqual(obs_out, exp_stdout)
 
 if __name__ == '__main__':

@@ -60,12 +60,13 @@ done
 """
 
 # Bash command to collapse the results and generate the scaling plots
-GET_RESULTS = """get_benchmark_results.py -i $timing_dest/%s -o $dest/plots/%s\n"""
+GET_RESULTS = """scaling process-bench-results -i $timing_dest/%s -o $dest/plots/%s\n"""
 
 def get_command_string(command, base_name, opts, values, out_opt):
-    """Generates the bash string to execute the benchmark command
+    """Generates the bash string with the benchmark command
+
     Inputs:
-        command: string with the command to benchmark
+        command: string with the base command to benchmark
         base_name: string with the base name of the output file (w/o extension)
         opts: list with the different options to provide to the command
         values: list of values to provide to the previous options
@@ -79,7 +80,7 @@ def get_command_string(command, base_name, opts, values, out_opt):
     with values[0], opts[1] with values[1] and so on.
     """
     if len(opts) != len(values):
-        raise ValueError("The number of options and the number of values " +
+        raise ValueError("The number of options and the number of values "
             "provided must be the same")
     # Get the string with the input options and their values
     in_opts = []
@@ -93,8 +94,9 @@ def get_command_string(command, base_name, opts, values, out_opt):
 
 def make_bench_suite_files(command, in_opts, bench_files, out_opt):
     """Generates a string with the bash commands to execute the benchmark suite
+
     Inputs:
-        command: string with the command to execute
+        command: string with the base command to execute
         in_opts: list with the options used to provide the input files to the 
             command
         bench_files: list of lists with the input files for each bench case
@@ -130,6 +132,7 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt):
 
 def make_bench_suite_parameters(command, parameters, out_opt):
     """Generates a string with the bash commands to execute the benchmark suite
+    
     Inputs:
         command: string with the command to execute
         parameters: dictionary with the parameter values to test, keyed by

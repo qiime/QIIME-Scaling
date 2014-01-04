@@ -17,33 +17,32 @@ class TestGetCommandString(TestCase):
     """Tests the get_command_string function"""
     
     def test_get_command_string_single(self):
-        """Returns the correct command when a single input option is provided"""
+        """Correctly generates a command with a single input option"""
         cmd = "pick_otus.py"
         base_name = "1000000"
         opts = ['-i']
         values = ['1000000.fna']
         out_opt = "-o"
         obs = get_command_string(cmd, base_name, opts, values, out_opt)
-        exp = "    timing_wrapper.sh $timing_dest/1000000/$i.txt " + \
-                "pick_otus.py -i 1000000.fna -o $output_dest/1000000/$i"
+        exp = ("    timing_wrapper.sh $timing_dest/1000000/$i.txt pick_otus.py "
+            "-i 1000000.fna -o $output_dest/1000000/$i")
         self.assertEqual(obs, exp)
 
     def test_get_command_string_multiple(self):
-        """Returns the correct command when multiple input options are provided"""
+        """Correctly generates a command with multiple input options"""
         cmd = "split_libraries_fastq.py -m mapping.txt"
         base_name = "1000000"
         opts = ['-i', '-b']
         values = ['reads/1000000.fna','barcodes/1000000.fna']
         out_opt = "-o"
         obs = get_command_string(cmd, base_name, opts, values, out_opt)
-        exp = "    timing_wrapper.sh $timing_dest/1000000/$i.txt " + \
-                "split_libraries_fastq.py -m mapping.txt -i " + \
-                "reads/1000000.fna -b barcodes/1000000.fna -o " + \
-                "$output_dest/1000000/$i"
+        exp = ("    timing_wrapper.sh $timing_dest/1000000/$i.txt "
+            "split_libraries_fastq.py -m mapping.txt -i reads/1000000.fna -b "
+            "barcodes/1000000.fna -o $output_dest/1000000/$i")
         self.assertEqual(obs, exp)
 
     def test_get_command_string_error(self):
-        """Raises an error if number of options and values do not match"""
+        """Correctly raises error if different number of options and values"""
         cmd = "split_libraries_fastq.py -m mapping.txt"
         base_name = "1000000"
         opts = ['-i', '-b']
@@ -56,7 +55,7 @@ class TestMakeBenchSuiteFiles(TestCase):
     """Tests the make_bench_suite_files function"""
 
     def test_make_bench_suite_files_single(self):
-        """Generates the correct string when a single option is provided"""
+        """Correctly generates the benchmark suite for single input option"""
         cmd = "pick_otus.py"
         in_opts = ["-i"]
         bench_files = [["1000000.fna"], ["2000000.fna"], ["3000000.fna"]]
@@ -65,7 +64,7 @@ class TestMakeBenchSuiteFiles(TestCase):
         self.assertEqual(obs, exp_bench_suite_files_single)
 
     def test_make_bench_suite_files_multiple(self):
-        """Generates the correct sting when multiple input options are provided"""
+        """Correctly generates the benchmark suite for multiple input options"""
         cmd = "split_libraries_fastq.py -m mapping.txt"
         in_opts = ["-i", "-b"]
         bench_files = [["reads/1000000.fna","barcodes/1000000.fna"],
@@ -79,7 +78,7 @@ class TestMakeBenchSuiteParameters(TestCase):
     """Tests the make_bench_suite_parameters function"""
 
     def test_make_bench_suite_parameters_single(self):
-        """Generates the correct string when a single option is provided"""
+        """Correctly generates the benchmark suite for a single parameter"""
         cmd = "parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna"
         params = {"jobs_to_start" : ["8", "16", "32"]}
         out_opt = "-o"
@@ -87,7 +86,7 @@ class TestMakeBenchSuiteParameters(TestCase):
         self.assertEqual(obs, exp_bench_suite_parameters_single)
 
     def test_make_bench_suite_parameters_multiple(self):
-        """Generates the correct sting when multiple input options are provided"""
+        """Correctly generates the benchmark suite for multiple parameters"""
         cmd = "parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna"
         params = {"jobs_to_start" : ["8", "16", "32"],
                     "similarity" : ["0.94", "0.97", "0.99"]}
@@ -137,7 +136,7 @@ do
 done
 
 # Get the benchmark results and produce the plots
-get_benchmark_results.py -i $timing_dest/ -o $dest/plots/
+scaling process-bench-results -i $timing_dest/ -o $dest/plots/
 """
 
 exp_bench_suite_files_multiple = """#!/bin/bash
@@ -182,7 +181,7 @@ do
 done
 
 # Get the benchmark results and produce the plots
-get_benchmark_results.py -i $timing_dest/ -o $dest/plots/
+scaling process-bench-results -i $timing_dest/ -o $dest/plots/
 """
 
 exp_bench_suite_parameters_single = """#!/bin/bash
@@ -230,7 +229,7 @@ done
 
 # Get the benchmark results and produce the plots
 mkdir $dest/plots
-get_benchmark_results.py -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
+scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
 """
 
 exp_bench_suite_parameters_multiple = """#!/bin/bash
@@ -289,8 +288,8 @@ done
 
 # Get the benchmark results and produce the plots
 mkdir $dest/plots
-get_benchmark_results.py -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
-get_benchmark_results.py -i $timing_dest/similarity -o $dest/plots/similarity
+scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
+scaling process-bench-results -i $timing_dest/similarity -o $dest/plots/similarity
 """
 
 if __name__ == '__main__':

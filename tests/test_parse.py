@@ -15,18 +15,18 @@ class ParseTests(TestCase):
     """Tests of parse functions"""
 
     def setUp(self):
-        """define some top-level data"""
+        """Set up data for use in unit tests"""
         self.single_parameter = single_parameter.split('\n')
         self.multiple_parameter = multiple_parameter.split('\n')
 
     def test_parse_single_parameter(self):
-        """Parse a parameter file with a single parameter"""
+        """Correctly parses a parameter file with a single entry"""
         exp = {'jobs_to_start' : ['2','4','8','16','32','64']}
         obs = parse_parameters_file(self.single_parameter)
         self.assertEqual(obs, exp)
 
     def test_parse_single_parameter(self):
-        """Parse a parameter file with a single parameter"""
+        """Correctly parses a parameter file with a multiple entry"""
         exp = {'jobs_to_start' : ['2','4','8','16','32','64'],
                 'similarity': ['0.94', '0.97', '0.99']}
         obs = parse_parameters_file(self.multiple_parameter)

@@ -16,36 +16,28 @@ from matplotlib import use
 use('Agg',warn=False)
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
-import re 
-
-def natural_sort( l ): 
-    """ Sort the given list in the way that humans expect.
-        Code adapted from:
-            http://www.codinghorror.com/blog/2007/12/
-                sorting-for-humans-natural-sort-order.html
-    """ 
-    convert = lambda text: int(text) if text.isdigit() else text 
-    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
-    l.sort( key=alphanum_key )
-    return l
+from scaling.util import natural_sort
 
 def process_timing_directory(timing_dir):
-    """Retrieves the timing results stored in timing_dir
+    """Retrieves the timing results stored in timing_dir in a dict form
 
     Inputs:
         timing_dir: path to the directory containing the timing results. It
-            should contain only directories
+            should contain only directories in the first level in the directory
+            structure and only files on the second level of the directory
+            structure
 
     Returns a dictionary with the following structure:
         {
-            label: list of strings,
+            label: list of strings with the test cases names,
             wall_time: (list of float - means, list of float - std dev),
             cpu_user: (list of float - means, list of float - std dev),
             cpu_kernel: (list of float - means, list of float - std dev),
             memory: (list of float - means, list of float - std dev)
         }
 
-    Note: raises a ValueError if there is some file in timing_dir
+    Note: raises a ValueError if there is some file in the first level in the
+        directory structure of timing_dir
     """
     # Initialize output dictionary
     data = {}
@@ -84,8 +76,8 @@ def process_timing_directory(timing_dir):
             f.close()
             # If first line is not of the form
             # <wall time>;<user time>;<cpu time>;<memory>
-            # means that the command didn't finish correctly. Add a note on the
-            # log file to let the user know
+            # means that the command didn't finish correctly. Print a warning
+            # message to let the user know
             if len(info) != 4:
                 print "Warning - File %s not used:" % filepath
             else:
@@ -139,14 +131,14 @@ def compute_rsquare(y, SSerr):
     return rsquare
 
 def curve_fitting(x, y):
-    """Fits a polynomial curve to the data points defined by x and y
+    """Fits a polynomial curve to the data points defined by the arrays x and y
 
     Input:
         x: numpy array of floats
         y: numpy array of floats
 
     Returns the polynomial curve with less degree that fits the data points
-    with an Rsquare over 0.99999; and its degree.
+        with an Rsquare over 0.999; and its degree.
     """
     deg = 0
     rsquare = 0
@@ -173,13 +165,15 @@ def generate_poly_label(poly, deg):
     return s
 
 def make_bench_plot(data, fit_key, keys, title, ylabel, scale=1):
-    """
+    """Creates a matplotlib figure with the benchmark results present in data
+
     Input:
-        data:
-        fit_key:
-        keys: list
-        title:
-        ylabel:
+        data: dictionary with the benchmark results
+        fit_key: key of data to use for computing the curve fitting
+        keys: list of keys of data to plot in the figure
+        title: string with the title of the plot
+        ylabel: string with the title of the y axis
+        scale: value to use as a scaling factor for the values in data
     """
     # Get the x axis data
     x = data['label']
@@ -215,32 +209,34 @@ def process_benchmark_results(input_dir):
 
     Inputs:
         input_dir: path to the directory containing the timing results
-    """
 
+    Walks through the input_dir folder retrieving the benchmark information and
+        generates a figure with the timing results and the memory consumption
+        results. It also returns two string containing the polynomial with the
+        best curve fit to the wall time and memory consumption data.
+    """
     # Retrieve the benchmark results
     data = process_timing_directory(input_dir)
     # Generate the plot with the timing results
     fit_key = "wall_time"
     keys = ["wall_time", "cpu_user", "cpu_kernel"]
     time_plot, time_poly = make_bench_plot(data, fit_key, keys, "Running time",
-                                    "Time (s)")
+                                           "Time (s)")
     # Generate the plot with the memory results
     fit_key = "memory"
     keys = ["memory"]
     mem_plot, mem_poly = make_bench_plot(data, fit_key, keys, "Memory usage",
-                                    "Memory (GB)", scale=1024*1024)
+                                         "Memory (GB)", scale=1024*1024)
     return data, time_plot, time_poly, mem_plot, mem_poly
 
 def make_comparison_plot(data, x_axis, key, title, ylabel, scale=1):
-    """Generates the plots comparing the benchmark results listed in data
+    """Creates a matplotlib figure with the benchmark results of multiple runs
 
     Input:
-        data: a dictionary where keys are the labels for the benchmarks
-            and the values are dictionaries containing the benchmark results
-            (see process_timing_directory)
-        x_axis:
-        key:
-        scale:
+        data: dictionary with the benchmark results
+        x_axis: array to use as X axis values
+        key: key of data to plot in the figure
+        scale: value to use as a scaling factor for the values in data
     """
     figure = plt.figure()
     ax = figure.add_subplot(111)

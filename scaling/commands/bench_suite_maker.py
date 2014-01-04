@@ -18,30 +18,30 @@ from scaling.make_bench_suite import (make_bench_suite_files,
 
 class BenchSuiteMaker(Command):
     BriefDescription = "Generates a benchmark suite file"
-    LongDescription = "Given a command and a list of benchmarks files or " + \
-        "a dictionary with the options to test, this command generates" + \
-        " a shell script that executes a complete benchmark suite."
+    LongDescription = ("Given a command and a list of benchmarks files or a "
+        "dictionary with the options to test, this command generates a shell "
+        "script that executes a complete benchmark suite.")
     CommandIns = ParameterCollection([
         CommandIn(Name='command', DataType=str,
             Description='command to benchmark', Required=True),
         CommandIn(Name='parameters', DataType=dict,
-            Description='dictionary where the keys are the parameters to ' + \
-            'test and the values are a list of values for such parameter.',
+            Description='dictionary where the keys are the parameters to test '
+            'and the values are a list of values for such parameter.',
             DefaultDescription='No parameters used', Default=None),
         CommandIn(Name='bench_files', DataType=list,
-            Description='List of lists of paths to the benchmark files to ' + \
-            'use as input for the command. Each inner list is a test case ' + \
-            'and should have the same length as the in_opts parameter.',
+            Description='List of lists of paths to the benchmark files to use '
+            'as input for the command. Each inner list is a test case and '
+            'should have the same length as the in_opts parameter.',
             DefaultDescription='No bench_files used',
             Required=False, Default=None),
         CommandIn(Name='in_opts', DataType=list,
-            Description='list of options used for providing the benchmark ' + \
-            'files to the command. It should have the same length and ' + \
-            'order than the inner lists of bench_files.',
-            DefaultDescription='No in_opts used',
+            Description='list of options used for providing the benchmark files'
+            ' to the command. It should have the same length and order than the'
+            ' inner lists of bench_files.',
+            DefaultDescription='["-i"] is used as a default',
             Required=False, Default=["-i"]),
         CommandIn(Name='out_opt', DataType=str,
-            Description='Option used for providing the output path to the ' + \
+            Description='Option used for providing the output path to the '
             'command to benchmark.',
             DefaultDescription='"-o" is used as default',
             Required=False, Default="-o")
@@ -60,15 +60,16 @@ class BenchSuiteMaker(Command):
         in_opts = kwargs['in_opts']
         if parameters:
             if bench_files:
-                raise CommandError("Parameters or bench_files should be " +
+                raise CommandError("Parameters or bench_files should be "
                     "provided, but not both.")
-            bench_str = make_bench_suite_parameters(command, parameters, out_opt)
+            bench_str = make_bench_suite_parameters(command, parameters,
+                                                    out_opt)
         elif bench_files:
             if not all(len(x) == len(in_opts) for x in bench_files):
                 raise CommandError("The length of bench_files and in_opts must "
                     "be the same.")
             bench_str = make_bench_suite_files(command, in_opts, bench_files,
-                                                out_opt)
+                                               out_opt)
         else:
             raise CommandError("Must specify parameters or bench_files.")
 

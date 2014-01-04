@@ -10,15 +10,21 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 def parse_parameters_file(lines):
-	"""Returns a dict with the parameters to test and its values
+    """Parses the parameters file encoded in lines and returns it as a dict
 
-	Inputs:
-		lines: open file object
-	"""
-	param_dict = {}
-	for line in lines:
-		line = line.strip()
-		if line:
-			(param, values) = line.split('\t')
-			param_dict[param] = values.split(',')
-	return param_dict
+    Inputs:
+        lines: open file object
+
+    The format of the parameter file is:
+        param_name <tab> value1,value2,...
+
+    The output dictionary is keyed by parameter name and values are lists with
+        the parameter values to test
+    """
+    param_dict = {}
+    for line in lines:
+        line = line.strip()
+        if line:
+            (param, values) = line.split('\t')
+            param_dict[param] = values.split(',')
+    return param_dict

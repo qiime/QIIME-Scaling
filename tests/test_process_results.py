@@ -11,7 +11,7 @@ __status__ = "Development"
 
 from unittest import TestCase, main
 from tempfile import mkdtemp
-from scaling.process_results import (natural_sort, process_timing_directory,
+from scaling.process_results import (process_timing_directory,
     compute_rsquare, curve_fitting, generate_poly_label, make_bench_plot,
     process_benchmark_results, make_comparison_plot, compare_benchmark_results)
 import os
@@ -59,14 +59,6 @@ class TestProcessResults(TestCase):
 
     def tearDown(self):
         rmtree(self.output_dir)
-
-    def test_natural_sort(self):
-        """Correctly sorts a list in natural sort"""
-        l = ['100_b','10_bb','100_a','20_aa','500_c', '9_c']
-        exp =['9_c','10_bb','20_aa','100_a','100_b','500_c']
-        obs = natural_sort(l)
-
-        self.assertEqual(obs, exp)
 
     def test_process_timing_directory_correct(self):
         """Correctly retrieves the measurements from the timing directory"""
