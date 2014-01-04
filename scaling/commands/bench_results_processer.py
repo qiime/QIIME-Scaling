@@ -17,9 +17,9 @@ from matplotlib.figure import Figure
 
 class BenchResultsProcesser(Command):
     BriefDescription = "Processes the benchmark suite results"
-    LongDescription = ("Takes the benchmark suite output directory and "
-        "processes the benchmark measurements, creating plots and collapsing"
-        " results in a usable form.")
+    LongDescription = "Takes the benchmark suite output directory and " +\
+        "processes the benchmark measurements, creating plots and collapsing" +\
+        " results in a usable form."
     CommandIns = ParameterCollection([
         CommandIn(Name='input_dir', DataType=str,
                   Description='Path to the directory with the time results',
