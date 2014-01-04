@@ -30,6 +30,13 @@ def write_summarized_results(result_key, data, option_value=None):
         raise IncompetentDeveloperError("Cannot write output without an "
                                         "output directory.")
 
+    if os.path.exists(option_value):
+        if os.path.isfile(option_value):
+            raise IOError("Output directory '%s' already exists and it is a file."
+                      % option_value)
+    else:
+        os.mkdir(option_value)
+
     output_fp = os.path.join(option_value, "%s.txt" % result_key)
 
     lines = []
@@ -60,9 +67,12 @@ def write_matplotlib_figure(result_key, data, option_value=None):
         raise IncompetentDeveloperError("Cannot write output without an "
                                         "output directory.")
 
-    if os.path.exists(option_value) and os.path.isfile(option_value):
-        raise IOError("Output directory '%s' already exists and it is a file."
+    if os.path.exists(option_value):
+        if os.path.isfile(option_value):
+            raise IOError("Output directory '%s' already exists and it is a file."
                       % option_value)
+    else:
+        os.mkdir(option_value)
 
     output_fp = os.path.join(option_value, "%s.png" % result_key)
     if os.path.exists(output_fp):
@@ -79,9 +89,12 @@ def write_string_to_dir(result_key, data, option_value=None):
         raise IncompetentDeveloperError("Cannot write output without an "
                                         "output directory.")
 
-    if os.path.exists(option_value) and os.path.isfile(option_value):
-        raise IOError("Output directory '%s' already exists and it is a file."
+    if os.path.exists(option_value):
+        if os.path.isfile(option_value):
+            raise IOError("Output directory '%s' already exists and it is a file."
                       % option_value)
+    else:
+        os.mkdir(option_value)
 
     output_fp = os.path.join(option_value, "%s.txt" % result_key)
     write_string(result_key, data, option_value=output_fp)

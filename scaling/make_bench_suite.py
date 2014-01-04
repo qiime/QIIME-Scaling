@@ -29,12 +29,12 @@ fi
 # Get a string with current date (format YYYYMMDD_HHMMSS) to name
 # the directory with the benchmark results
 cdate=`date +_%%Y%%m%%d_%%H%%M%%S`
-dest=$PWD/%s$date
+dest=$PWD/%s$cdate
 mkdir $dest
 
 # Create output directory structure
-output_dest = $dest"/command_outputs"
-timing_dest = $dest"/timing"
+output_dest=$dest"/command_outputs"
+timing_dest=$dest"/timing"
 
 mkdir $output_dest
 mkdir $timing_dest

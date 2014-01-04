@@ -35,7 +35,7 @@ usage_examples = [
 # to define options here that do not exist as parameters, e.g., an output file.
 inputs = [
     OptparseOption(Parameter=cmd_in_lookup('input_dir'),
-                   Type='existing_filepath',
+                   Type='existing_dirpath',
                    Action='store', # default is 'store', change if desired
                    Handler=None, # must be defined if desired
                    ShortName='i', # must be defined if desired
