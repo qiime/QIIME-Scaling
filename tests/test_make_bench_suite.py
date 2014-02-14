@@ -136,7 +136,7 @@ do
 done
 
 # Get the benchmark results and produce the plots
-scaling process-bench-results -i $timing_dest/ -o $dest/plots/
+scaling process-bench-results -i $timing_dest/ -o $dest/plots/ 
 """
 
 exp_bench_suite_files_multiple = """#!/bin/bash
@@ -181,7 +181,7 @@ do
 done
 
 # Get the benchmark results and produce the plots
-scaling process-bench-results -i $timing_dest/ -o $dest/plots/
+scaling process-bench-results -i $timing_dest/ -o $dest/plots/ 
 """
 
 exp_bench_suite_parameters_single = """#!/bin/bash
@@ -229,7 +229,7 @@ done
 
 # Get the benchmark results and produce the plots
 mkdir $dest/plots
-scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
+scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start 
 """
 
 exp_bench_suite_parameters_multiple = """#!/bin/bash
@@ -288,8 +288,8 @@ done
 
 # Get the benchmark results and produce the plots
 mkdir $dest/plots
-scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start
-scaling process-bench-results -i $timing_dest/similarity -o $dest/plots/similarity
+scaling process-bench-results -i $timing_dest/jobs_to_start -o $dest/plots/jobs_to_start 
+scaling process-bench-results -i $timing_dest/similarity -o $dest/plots/similarity 
 """
 
 if __name__ == '__main__':

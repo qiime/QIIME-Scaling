@@ -68,7 +68,7 @@ done
 
 # Bash command to collapse the results and generate the scaling plots
 GET_RESULTS = ("scaling process-bench-results -i $timing_dest/%s -o "
-               "$dest/plots/%s")
+               "$dest/plots/%s %s\n")
 
 
 def get_command_string(command, base_name, opts, values, out_opt):
@@ -149,7 +149,7 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt, pbs=False,
     result.append(FOR_LOOP % ("\n".join(commands)))
     # Append to the results string the command to get the results and
     # generate the benchmark plots
-    result.append(GET_RESULTS % ("", ""))
+    result.append(GET_RESULTS % ("", "", ""))
     return "".join(result)
 
 
@@ -186,7 +186,7 @@ def make_bench_suite_parameters(command, parameters, out_opt, pbs=False,
         result.append(MKDIR_OUTPUT_CMD % param)
         result.append(MKDIR_TIMING_CMD % param)
         # Loop through all the possible values of the current parameter
-        get_results_list.append(GET_RESULTS % (param, param))
+        get_results_list.append(GET_RESULTS % (param, param, ""))
         for val in parameters[param]:
             # Create a directory for storing the output commands
             # and timing results for current parameter value
