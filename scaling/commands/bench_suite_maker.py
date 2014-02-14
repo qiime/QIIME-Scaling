@@ -67,7 +67,7 @@ class BenchSuiteMaker(Command):
         CommandIn(Name='pbs_extra_args', DataType=str,
                   Description='Any extra arguments needed to qsub',
                   DefaultDescription='No extra arguments are used',
-                  Required=False, Default=None)
+                  Required=False, Default="")
     ])
     CommandOuts = ParameterCollection([
         CommandOut(Name='bench_suite', DataType=str,

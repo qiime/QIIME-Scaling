@@ -68,7 +68,7 @@ done
 
 # Bash command to collapse the results and generate the scaling plots
 GET_RESULTS = ("scaling process-bench-results -i $timing_dest/%s -o "
-               "$dest/plots/%s\n")
+               "$dest/plots/%s")
 
 
 def get_command_string(command, base_name, opts, values, out_opt):
