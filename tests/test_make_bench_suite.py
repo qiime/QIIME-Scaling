@@ -11,11 +11,13 @@ __status__ = "Development"
 
 from unittest import TestCase, main
 from scaling.make_bench_suite import (get_command_string,
-    make_bench_suite_files, make_bench_suite_parameters)
+                                      make_bench_suite_files,
+                                      make_bench_suite_parameters)
+
 
 class TestGetCommandString(TestCase):
     """Tests the get_command_string function"""
-    
+
     def test_get_command_string_single(self):
         """Correctly generates a command with a single input option"""
         cmd = "pick_otus.py"
@@ -24,8 +26,8 @@ class TestGetCommandString(TestCase):
         values = ['1000000.fna']
         out_opt = "-o"
         obs = get_command_string(cmd, base_name, opts, values, out_opt)
-        exp = ("    timing_wrapper.sh $timing_dest/1000000/$i.txt pick_otus.py "
-            "-i 1000000.fna -o $output_dest/1000000/$i")
+        exp = ("    timing_wrapper.sh $timing_dest/1000000/$i.txt pick_otus.py"
+               " -i 1000000.fna -o $output_dest/1000000/$i")
         self.assertEqual(obs, exp)
 
     def test_get_command_string_multiple(self):
@@ -33,12 +35,12 @@ class TestGetCommandString(TestCase):
         cmd = "split_libraries_fastq.py -m mapping.txt"
         base_name = "1000000"
         opts = ['-i', '-b']
-        values = ['reads/1000000.fna','barcodes/1000000.fna']
+        values = ['reads/1000000.fna', 'barcodes/1000000.fna']
         out_opt = "-o"
         obs = get_command_string(cmd, base_name, opts, values, out_opt)
         exp = ("    timing_wrapper.sh $timing_dest/1000000/$i.txt "
-            "split_libraries_fastq.py -m mapping.txt -i reads/1000000.fna -b "
-            "barcodes/1000000.fna -o $output_dest/1000000/$i")
+               "split_libraries_fastq.py -m mapping.txt -i reads/1000000.fna "
+               "-b barcodes/1000000.fna -o $output_dest/1000000/$i")
         self.assertEqual(obs, exp)
 
     def test_get_command_string_error(self):
@@ -49,7 +51,8 @@ class TestGetCommandString(TestCase):
         values = ['1000000.fna']
         out_opt = "-o"
         self.assertRaises(ValueError, get_command_string, cmd, base_name, opts,
-            values, out_opt)
+                          values, out_opt)
+
 
 class TestMakeBenchSuiteFiles(TestCase):
     """Tests the make_bench_suite_files function"""
@@ -64,15 +67,16 @@ class TestMakeBenchSuiteFiles(TestCase):
         self.assertEqual(obs, exp_bench_suite_files_single)
 
     def test_make_bench_suite_files_multiple(self):
-        """Correctly generates the benchmark suite for multiple input options"""
+        """Correctly generates the bench suite for multiple input options"""
         cmd = "split_libraries_fastq.py -m mapping.txt"
         in_opts = ["-i", "-b"]
-        bench_files = [["reads/1000000.fna","barcodes/1000000.fna"],
-                        ["reads/2000000.fna","barcodes/2000000.fna"],
-                        ["reads/3000000.fna","barcodes/3000000.fna"]]
+        bench_files = [["reads/1000000.fna", "barcodes/1000000.fna"],
+                       ["reads/2000000.fna", "barcodes/2000000.fna"],
+                       ["reads/3000000.fna", "barcodes/3000000.fna"]]
         out_opt = "-o"
         obs = make_bench_suite_files(cmd, in_opts, bench_files, out_opt)
         self.assertEqual(obs, exp_bench_suite_files_multiple)
+
 
 class TestMakeBenchSuiteParameters(TestCase):
     """Tests the make_bench_suite_parameters function"""
@@ -80,7 +84,7 @@ class TestMakeBenchSuiteParameters(TestCase):
     def test_make_bench_suite_parameters_single(self):
         """Correctly generates the benchmark suite for a single parameter"""
         cmd = "parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna"
-        params = {"jobs_to_start" : ["8", "16", "32"]}
+        params = {"jobs_to_start": ["8", "16", "32"]}
         out_opt = "-o"
         obs = make_bench_suite_parameters(cmd, params, out_opt)
         self.assertEqual(obs, exp_bench_suite_parameters_single)
@@ -88,8 +92,8 @@ class TestMakeBenchSuiteParameters(TestCase):
     def test_make_bench_suite_parameters_multiple(self):
         """Correctly generates the benchmark suite for multiple parameters"""
         cmd = "parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna"
-        params = {"jobs_to_start" : ["8", "16", "32"],
-                    "similarity" : ["0.94", "0.97", "0.99"]}
+        params = {"jobs_to_start": ["8", "16", "32"],
+                  "similarity": ["0.94", "0.97", "0.99"]}
         out_opt = "-o"
         obs = make_bench_suite_parameters(cmd, params, out_opt)
         self.assertEqual(obs, exp_bench_suite_parameters_multiple)

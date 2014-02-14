@@ -50,9 +50,11 @@ MKDIR_TIMING_CMD = "mkdir $timing_dest/%s\n"
 COMMAND_TEMPLATE = ("    timing_wrapper.sh $timing_dest/%s/$i.txt %s %s %s "
                     "$output_dest/%s/$i")
 
-# The PBS template follows this structure
-# echo "cd $PWD; <command>" | qsub -k oe -N <job_name> -q <queue> <extra args>
-PBS_TEMPLATE = ("    echo \"cd $PWD; %s\" | qsub -k oe -N %s%d -q %s %s")
+# The PBS template follows this structure - blah=${blah#?}
+# <job id var>+=";"`echo "cd $PWD; <command>" | qsub -k oe -N <job_name>
+#   -q <queue> <extra args>`
+PBS_CMD_TEMPLATE = ("    %s+=\";\"`echo \"cd $PWD; %s\" | qsub -k oe"
+                    " -N %s%d -q %s %s`")
 
 # The bash loop used to execute the commands as many times as
 # provided by the user
@@ -141,12 +143,17 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt, pbs=False,
                                            bfs, out_opt))
     if pbs:
         # We are creating a benchmark suite in a cluster environment
+        # Clean up the scaling_jobs variable
+        result.append("scaling_jobs=\"\"\n")
         # Add the qsub command for each job
-        commands = [PBS_TEMPLATE % (cmd, job_prefix, i, queue, pbs_extra_args)
-                    for i, cmd in enumerate(commands)]
+        commands = [PBS_CMD_TEMPLATE % ("scaling_jobs", cmd, job_prefix, i,
+                    queue, pbs_extra_args) for i, cmd in enumerate(commands)]
     # Insert the command in the bash for loop and
     # append these lines to the result string
     result.append(FOR_LOOP % ("\n".join(commands)))
+    if pbs:
+        # We need to remove the first ";" character of scaling_jobs
+        result.append("scaling_jobs=${scaling_jobs#?}\n")
     # Append to the results string the command to get the results and
     # generate the benchmark plots
     result.append(GET_RESULTS % ("", "", ""))
@@ -199,9 +206,11 @@ def make_bench_suite_parameters(command, parameters, out_opt, pbs=False,
                                                [val], out_opt))
     if pbs:
         # We are creating a benchmark suite in a cluster environment
+        # Clean up the scaling_jobs variable
+        result.append("scaling_jobs=\"\"")
         # Add the qsub command for each job
-        commands = [PBS_TEMPLATE % (cmd, job_prefix, queue, pbs_extra_args)
-                    for cmd in commands]
+        commands = [PBS_CMD_TEMPLATE % ("scaling_jobs", cmd, job_prefix, i,
+                    queue, pbs_extra_args) for i, cmd in enumerate(commands)]
     # Insert the commands in the bash for loop and
     # append these lines to the result string
     result.append(FOR_LOOP % ("\n".join(commands)))
