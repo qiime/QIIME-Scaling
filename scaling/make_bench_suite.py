@@ -52,7 +52,7 @@ COMMAND_TEMPLATE = ("    timing_wrapper.sh $timing_dest/%s/$i.txt %s %s %s "
 
 # The PBS template follows this structure
 # echo "cd $PWD; <command>" | qsub -k oe -N <job_name> -q <queue> <extra args>
-PBS_TEMPLATE = ("    echo \"cd $PWD; %s\" | qsub -k oe -N %s -q %s %s")
+PBS_TEMPLATE = ("    echo \"cd $PWD; %s\" | qsub -k oe -N %s%d -q %s %s")
 
 # The bash loop used to execute the commands as many times as
 # provided by the user
@@ -142,8 +142,8 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt, pbs=False,
     if pbs:
         # We are creating a benchmark suite in a cluster environment
         # Add the qsub command for each job
-        commands = [PBS_TEMPLATE % (cmd, job_prefix, queue, pbs_extra_args)
-                    for cmd in commands]
+        commands = [PBS_TEMPLATE % (cmd, job_prefix, i, queue, pbs_extra_args)
+                    for i, cmd in enumerate(commands)]
     # Insert the command in the bash for loop and
     # append these lines to the result string
     result.append(FOR_LOOP % ("\n".join(commands)))
