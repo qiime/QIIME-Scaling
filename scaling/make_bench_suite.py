@@ -45,10 +45,17 @@ MKDIR_OUTPUT_CMD = "mkdir $output_dest/%s\n"
 MKDIR_TIMING_CMD = "mkdir $timing_dest/%s\n"
 
 # The command template follows this structure
-# timing_wrapper.sh <out time file> <command> <var opts & bench_files> <out opt> <out path>
-COMMAND_TEMPLATE = """    timing_wrapper.sh $timing_dest/%s/$i.txt %s %s %s $output_dest/%s/$i"""
+# timing_wrapper.sh <out time file> <command> <var opts & bench_files>
+#    <out opt> <out path>
+COMMAND_TEMPLATE = ("    timing_wrapper.sh $timing_dest/%s/$i.txt %s %s %s "
+                    "$output_dest/%s/$i")
 
-# The bash loop used to execute the commands as many times as provided by the user
+# The PBS template follows this structure
+# echo "cd $PWD; <command>" | qsub -k oe -N <job_name> -q <queue> <extra args>
+PBS_TEMPLATE = ("    echo \"cd $PWD; %s\" | qsub -k oe -N %s -q %s %s")
+
+# The bash loop used to execute the commands as many times as
+# provided by the user
 FOR_LOOP = """# Loop as many times as desired
 for i in `seq $num_rep`
 do
@@ -60,7 +67,9 @@ done
 """
 
 # Bash command to collapse the results and generate the scaling plots
-GET_RESULTS = """scaling process-bench-results -i $timing_dest/%s -o $dest/plots/%s\n"""
+GET_RESULTS = ("scaling process-bench-results -i $timing_dest/%s -o "
+               "$dest/plots/%s\n")
+
 
 def get_command_string(command, base_name, opts, values, out_opt):
     """Generates the bash string with the benchmark command
@@ -76,12 +85,12 @@ def get_command_string(command, base_name, opts, values, out_opt):
     Note: raises a ValueError if the number of options and the number of values
     provided does not match
 
-    The opts list and the values list are paired in the same order, i.e. opts[0]
-    with values[0], opts[1] with values[1] and so on.
+    The opts list and the values list are paired in the same order, i.e.
+    opts[0] with values[0], opts[1] with values[1] and so on.
     """
     if len(opts) != len(values):
         raise ValueError("The number of options and the number of values "
-            "provided must be the same")
+                         "provided must be the same")
     # Get the string with the input options and their values
     in_opts = []
     for opt, val in zip(opts, values):
@@ -90,14 +99,16 @@ def get_command_string(command, base_name, opts, values, out_opt):
     options_str = " ".join(in_opts)
 
     return COMMAND_TEMPLATE % (base_name, command, options_str,
-                                out_opt, base_name)
+                               out_opt, base_name)
 
-def make_bench_suite_files(command, in_opts, bench_files, out_opt):
+
+def make_bench_suite_files(command, in_opts, bench_files, out_opt, pbs=False,
+                           job_prefix="bench_", queue="", pbs_extra_args=""):
     """Generates a string with the bash commands to execute the benchmark suite
 
     Inputs:
         command: string with the base command to execute
-        in_opts: list with the options used to provide the input files to the 
+        in_opts: list with the options used to provide the input files to the
             command
         bench_files: list of lists with the input files for each bench case
             e.g.  [ ["option1_file1","option2_file1"],
@@ -105,6 +116,12 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt):
                     ["option1_file3","option2_file3"] ]
         out_opt: string with the option used to indicate the output path to the
             command
+        pbs: flag to determine if the benchmark suite will run in a PBS
+            cluster environment
+        job_prefix: prefix for the job name in case of a PBS cluster
+            environment
+        queue: PBS queue to submit jobs
+        pbs_extra_args: any extra arguments needed to qsub
     """
     # Initialize the result string list with the bash header
     # Get the base name of the command
@@ -113,26 +130,34 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt):
     # Iterate over all the benchmark files
     commands = []
     for bfs in bench_files:
-        # Add the command to create the directory to store the results of the 
+        # Add the command to create the directory to store the results of the
         # benchmark suite
         bf = bfs[0]
         base_name = splitext(basename(bf))[0]
         result.append(MKDIR_OUTPUT_CMD % base_name)
         result.append(MKDIR_TIMING_CMD % base_name)
         # Get the string of the command to be executed
-        commands.append( get_command_string(command, base_name, in_opts,
-                                            bfs, out_opt) )
+        commands.append(get_command_string(command, base_name, in_opts,
+                                           bfs, out_opt))
+    if pbs:
+        # We are creating a benchmark suite in a cluster environment
+        # Add the qsub command for each job
+        commands = [PBS_TEMPLATE % (cmd, job_prefix, queue, pbs_extra_args)
+                    for cmd in commands]
     # Insert the command in the bash for loop and
     # append these lines to the result string
-    result.append( FOR_LOOP % ("\n".join(commands)) )
+    result.append(FOR_LOOP % ("\n".join(commands)))
     # Append to the results string the command to get the results and
     # generate the benchmark plots
-    result.append(GET_RESULTS % ("",""))
+    result.append(GET_RESULTS % ("", ""))
     return "".join(result)
 
-def make_bench_suite_parameters(command, parameters, out_opt):
+
+def make_bench_suite_parameters(command, parameters, out_opt, pbs=False,
+                                job_prefix="bench_", queue="",
+                                pbs_extra_args=""):
     """Generates a string with the bash commands to execute the benchmark suite
-    
+
     Inputs:
         command: string with the command to execute
         parameters: dictionary with the parameter values to test, keyed by
@@ -141,6 +166,12 @@ def make_bench_suite_parameters(command, parameters, out_opt):
                     'param2' : ["val1", "val2", "val3"]}
         out_opt: string with the option used to indicate the output path to the
             command
+        pbs: flag to determine if the benchmark suite will run in a PBS
+            cluster environment
+        job_prefix: prefix for the job name in case of a PBS cluster
+            environment
+        queue: PBS queue to submit jobs
+        pbs_extra_args: any extra arguments needed to qsub
     """
     # Initialize the result string list with the bash header
     # Get the base name of the command
@@ -164,11 +195,16 @@ def make_bench_suite_parameters(command, parameters, out_opt):
             result.append(MKDIR_TIMING_CMD % param_dir)
             # Get the string of the command to be executed
             param_str = "--" + param
-            commands.append( get_command_string(command, param_dir, [param_str],
-                                                [val], out_opt) )
+            commands.append(get_command_string(command, param_dir, [param_str],
+                                               [val], out_opt))
+    if pbs:
+        # We are creating a benchmark suite in a cluster environment
+        # Add the qsub command for each job
+        commands = [PBS_TEMPLATE % (cmd, job_prefix, queue, pbs_extra_args)
+                    for cmd in commands]
     # Insert the commands in the bash for loop and
     # append these lines to the result string
-    result.append( FOR_LOOP % ("\n".join(commands)) )
+    result.append(FOR_LOOP % ("\n".join(commands)))
     # Append the result string for each parameter to get the
     # results and generate the benchmark plots
     result.append("mkdir $dest/plots\n")

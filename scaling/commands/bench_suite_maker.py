@@ -54,7 +54,7 @@ class BenchSuiteMaker(Command):
                   'run in a PBS cluster environment',
                   DefaultDescription='False: run serially in bash',
                   Required=False, Default=False),
-        CoomandIn(Name='job_prefix', DataType=str,
+        CommandIn(Name='job_prefix', DataType=str,
                   Description='Prefix for the job name in case of a PBS '
                   'cluster environment',
                   DefaultDescription='"bench_" is used as a default prefix',
