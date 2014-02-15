@@ -35,10 +35,11 @@ def check_status(jobs_to_monitor):
     running_jobs = []
     for l in lines:
         job_id, job_name, user, time, status, queue = l.split()
+        job_id = job_id.split('.')[0]
         # Check if this job is one of the jobs that we have to
         # monitor and check if it is running or queued
         if job_id in jobs_to_monitor and status in ['R', 'Q']:
-            running_jobs.append()
+            running_jobs.append(job_id)
     # Return the list with the running jobs that we're still waiting for
     return running_jobs
 
@@ -50,6 +51,8 @@ def wait_on(jobs_to_monitor, poll_interval=5):
         jobs_to_monitor: list of job ids
         poll_interval: interval between checks, in seconds
     """
+    # Get the jobs ids by up to the first '.' character
+    jobs_to_monitor = [job.split('.')[0] for job in jobs_to_monitor]
     # Loop until there is some job to monitor
     while jobs_to_monitor:
         # Sleep before new job status check
