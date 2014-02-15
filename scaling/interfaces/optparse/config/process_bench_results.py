@@ -14,10 +14,10 @@ from pyqi.core.interfaces.optparse import (OptparseUsageExample,
                                            OptparseOption, OptparseResult)
 from pyqi.core.command import (make_command_in_collection_lookup_f,
                                make_command_out_collection_lookup_f)
+from pyqi.core.interfaces.optparse.input_handler import string_list_handler
 from scaling.commands.bench_results_processer import CommandConstructor
-from scaling.interfaces.optparse.output_handler import (write_summarized_results,
-                                                        write_matplotlib_figure,
-                                                        write_string_to_dir)
+from scaling.interfaces.optparse.output_handler import \
+    (write_summarized_results, write_matplotlib_figure, write_string_to_dir)
 
 # Convenience function for looking up parameters by name.
 cmd_in_lookup = make_command_in_collection_lookup_f(CommandConstructor)
@@ -36,13 +36,22 @@ usage_examples = [
 inputs = [
     OptparseOption(Parameter=cmd_in_lookup('input_dir'),
                    Type='existing_dirpath',
-                   Action='store', # default is 'store', change if desired
-                   Handler=None, # must be defined if desired
-                   ShortName='i', # must be defined if desired
-                   # Name='input_dir', # implied by Parameter
-                   # Required=True, # implied by Parameter
-                   # Help='Path to the directory with the time results', # implied by Parameter
+                   Action='store',
+                   Handler=None,
+                   ShortName='i',
+                   # Name='input_dir',
+                   # Required=True,
+                   # Help='Path to the directory with the time results',
                    ),
+    OptparseOption(Parameter=cmd_in_lookup('job_ids'),
+                   Type='str',
+                   Action='store',
+                   Handler=string_list_handler,
+                   ShortName='w',
+                   Name='wait_on',
+                   Required=False,
+                   Help='Comma-separated list of job ids to wait for before '
+                        'processing the results')
     OptparseOption(Parameter=None,
                    Type='new_dirpath',
                    ShortName='o',
@@ -56,18 +65,18 @@ inputs = [
 # inputs list (above).
 outputs = [
     OptparseResult(Parameter=cmd_out_lookup('bench_data'),
-                    Handler=write_summarized_results,
-                    InputName='output-dir'),
+                   Handler=write_summarized_results,
+                   InputName='output-dir'),
     OptparseResult(Parameter=cmd_out_lookup('mem_fig'),
-                    Handler=write_matplotlib_figure,
-                    InputName='output-dir'),
+                   Handler=write_matplotlib_figure,
+                   InputName='output-dir'),
     OptparseResult(Parameter=cmd_out_lookup('mem_str'),
-                    Handler=write_string_to_dir,
-                    InputName='output-dir'),
+                   Handler=write_string_to_dir,
+                   InputName='output-dir'),
     OptparseResult(Parameter=cmd_out_lookup('time_fig'),
-                    Handler=write_matplotlib_figure,
-                    InputName='output-dir'),
+                   Handler=write_matplotlib_figure,
+                   InputName='output-dir'),
     OptparseResult(Parameter=cmd_out_lookup('time_str'),
-                    Handler=write_string_to_dir,
-                    InputName='output-dir'),
+                   Handler=write_string_to_dir,
+                   InputName='output-dir'),
 ]
