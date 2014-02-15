@@ -154,9 +154,13 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt, pbs=False,
     if pbs:
         # We need to remove the first ";" character of scaling_jobs
         result.append("scaling_jobs=${scaling_jobs#?}\n")
-    # Append to the results string the command to get the results and
-    # generate the benchmark plots
-    result.append(GET_RESULTS % ("", "", ""))
+        # Append to the results string the command to get the results and
+        # generate the benchmark plots
+        result.append(GET_RESULTS % ("", "", "-w $scaling_jobs"))
+    else:
+        # Append to the results string the command to get the results and
+        # generate the benchmark plots
+        result.append(GET_RESULTS % ("", "", ""))
     return "".join(result)
 
 
@@ -184,16 +188,19 @@ def make_bench_suite_parameters(command, parameters, out_opt, pbs=False,
     # Get the base name of the command
     base_cmd = command.split(" ")[0].split(".")[0]
     result = [BASH_HEADER % base_cmd]
-    # Iterate over the benchmark parameters
+    # Iterate over the parameters to benchmark
     commands = []
     get_results_list = []
+    # These two variables are used in case of a pbs env
+    count = 0
+    var_jobs = []
     for param in parameters:
         # Add the commands to create the directories to store the
         # results of the benchmark suite
         result.append(MKDIR_OUTPUT_CMD % param)
         result.append(MKDIR_TIMING_CMD % param)
         # Loop through all the possible values of the current parameter
-        get_results_list.append(GET_RESULTS % (param, param, ""))
+        param_cmds = []
         for val in parameters[param]:
             # Create a directory for storing the output commands
             # and timing results for current parameter value
@@ -202,20 +209,37 @@ def make_bench_suite_parameters(command, parameters, out_opt, pbs=False,
             result.append(MKDIR_TIMING_CMD % param_dir)
             # Get the string of the command to be executed
             param_str = "--" + param
-            commands.append(get_command_string(command, param_dir, [param_str],
-                                               [val], out_opt))
-    if pbs:
-        # We are creating a benchmark suite in a cluster environment
-        # Clean up the scaling_jobs variable
-        result.append("scaling_jobs=\"\"")
-        # Add the qsub command for each job
-        commands = [PBS_CMD_TEMPLATE % ("scaling_jobs", cmd, job_prefix, i,
-                    queue, pbs_extra_args) for i, cmd in enumerate(commands)]
+            param_cmds.append(get_command_string(command, param_dir,
+                                                 [param_str], [val], out_opt))
+        # Check if we are crating the command for a cluster environment
+        if pbs:
+            var_job = "%s_jobs" % param
+            var_jobs.append(var_job)
+            param_cmds = [PBS_CMD_TEMPLATE % (var_job, cmd, job_prefix,
+                          count + i, queue, pbs_extra_args) for i, cmd in
+                          enumerate(param_cmds)]
+            count += len(param_cmds)
+            # Create the process results command
+            get_results_list.append(GET_RESULTS % (param, param,
+                                                   "-w $%s" % var_job))
+        else:
+            # Create the process results command
+            get_results_list.append(GET_RESULTS % (param, param, ""))
+        # Extend the commands list with the param commands
+        commands.extend(param_cmds)
+    # Clean up bash variables
+    # Note that if we are not in a pbs command, var_jobs is empty
+    for var_job in var_jobs:
+        result.append("%s=\"\"\n" % var_job)
     # Insert the commands in the bash for loop and
     # append these lines to the result string
     result.append(FOR_LOOP % ("\n".join(commands)))
     # Append the result string for each parameter to get the
     # results and generate the benchmark plots
     result.append("mkdir $dest/plots\n")
+    # Remove the first ";" character of the bash variables
+    # Note that if we are not in a pbs command, var_jobs is empty
+    for var_job in var_jobs:
+        result.append("%s=${%s#?}\n" % (var_job, var_job))
     result.extend(get_results_list)
     return "".join(result)
