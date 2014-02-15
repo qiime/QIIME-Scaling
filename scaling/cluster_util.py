@@ -27,7 +27,7 @@ def check_status(jobs_to_monitor):
     # Get all the commands running pf the current user
     user = os.environ['USER']
     qstat_cmd = "qstat | grep %s" % user
-    proc = subprocess.Popen(qstat_cmd, stout=subprocess.PIPE)
+    proc = subprocess.Popen(qstat_cmd, stdout=subprocess.PIPE)
     (stdout, stderr) = proc.communicate()
     # Parse the qstat output
     lines = stdout.splitlines()
