@@ -51,7 +51,7 @@ inputs = [
                    Name='wait_on',
                    Required=False,
                    Help='Comma-separated list of job ids to wait for before '
-                        'processing the results')
+                        'processing the results'),
     OptparseOption(Parameter=None,
                    Type='new_dirpath',
                    ShortName='o',
