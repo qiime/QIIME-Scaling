@@ -11,7 +11,10 @@ __status__ = "Development"
 
 from os import listdir
 from os.path import abspath, join
+
 from scaling.parse import parse_parameters_file
+from scaling.util import natural_sort
+
 
 def load_parameters(param_fp):
     """Return a parsed parameters file"""
@@ -19,6 +22,7 @@ def load_parameters(param_fp):
         with open(param_fp, 'U') as param_f:
             return parse_parameters_file(param_f)
     return None
+
 
 def get_bench_paths(input_dirs):
     """Goes through the item in each directory and returns their path
@@ -37,7 +41,7 @@ def get_bench_paths(input_dirs):
         same number of items
     """
     bench_paths_by_dir = []
-    
+
     # Loop through the list of directories
     for input_dir in input_dirs:
         # Get the contents of the current folder
@@ -46,17 +50,17 @@ def get_bench_paths(input_dirs):
         # Add the folder to the paths, we get absolute paths already
         paths = map(join, [input_dir] * len(paths), paths)
         bench_paths_by_dir.append(paths)
-    
+
     # Check that all the input folders contain the same number of items
     n = len(bench_paths_by_dir[0])
     if not all(len(x) == n for x in bench_paths_by_dir):
         raise ValueError("All the input directories should contain the same "
-            "number of items.")
-    
+                         "number of items.")
+
     # Sort all the lists. It is assumed that all the file or directory names
     # present on such directories match across benchmark folders
-    map(sorted, bench_paths_by_dir)
-    
+    bench_paths_by_dir = map(natural_sort, bench_paths_by_dir)
+
     # Group the files in different folders by their name matching
     bench_files = []
     for i in range(len(bench_paths_by_dir[0])):
