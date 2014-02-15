@@ -53,7 +53,7 @@ COMMAND_TEMPLATE = ("    timing_wrapper.sh $timing_dest/%s/$i.txt %s %s %s "
 # The PBS template follows this structure - blah=${blah#?}
 # <job id var>+=";"`echo "cd $PWD; <command>" | qsub -k oe -N <job_name>
 #   -q <queue> <extra args>`
-PBS_CMD_TEMPLATE = ("    %s+=\";\"`echo \"cd $PWD; %s\" | qsub -k oe"
+PBS_CMD_TEMPLATE = ("    %s+=\",\"`echo \"cd $PWD; %s\" | qsub -k oe"
                     " -N %s%d -q %s %s`")
 
 # The bash loop used to execute the commands as many times as

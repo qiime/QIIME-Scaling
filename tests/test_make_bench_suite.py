@@ -253,9 +253,9 @@ scaling_jobs=""
 for i in `seq $num_rep`
 do
     # benchmarking commands:
-    scaling_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/1000000/$i.txt pick_otus.py -i 1000000.fna -o $output_dest/1000000/$i" | qsub -k oe -N test0 -q friendlyq -m abe`
-    scaling_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/2000000/$i.txt pick_otus.py -i 2000000.fna -o $output_dest/2000000/$i" | qsub -k oe -N test1 -q friendlyq -m abe`
-    scaling_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/3000000/$i.txt pick_otus.py -i 3000000.fna -o $output_dest/3000000/$i" | qsub -k oe -N test2 -q friendlyq -m abe`
+    scaling_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/1000000/$i.txt pick_otus.py -i 1000000.fna -o $output_dest/1000000/$i" | qsub -k oe -N test0 -q friendlyq -m abe`
+    scaling_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/2000000/$i.txt pick_otus.py -i 2000000.fna -o $output_dest/2000000/$i" | qsub -k oe -N test1 -q friendlyq -m abe`
+    scaling_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/3000000/$i.txt pick_otus.py -i 3000000.fna -o $output_dest/3000000/$i" | qsub -k oe -N test2 -q friendlyq -m abe`
 done
 
 # Get the benchmark results and produce the plots
@@ -419,12 +419,12 @@ similarity_jobs=""
 for i in `seq $num_rep`
 do
     # benchmarking commands:
-    jobs_to_start_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/jobs_to_start/8/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --jobs_to_start 8 -o $output_dest/jobs_to_start/8/$i" | qsub -k oe -N test0 -q friendlyq -m abe`
-    jobs_to_start_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/jobs_to_start/16/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --jobs_to_start 16 -o $output_dest/jobs_to_start/16/$i" | qsub -k oe -N test1 -q friendlyq -m abe`
-    jobs_to_start_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/jobs_to_start/32/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --jobs_to_start 32 -o $output_dest/jobs_to_start/32/$i" | qsub -k oe -N test2 -q friendlyq -m abe`
-    similarity_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/similarity/0.94/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --similarity 0.94 -o $output_dest/similarity/0.94/$i" | qsub -k oe -N test3 -q friendlyq -m abe`
-    similarity_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/similarity/0.97/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --similarity 0.97 -o $output_dest/similarity/0.97/$i" | qsub -k oe -N test4 -q friendlyq -m abe`
-    similarity_jobs+=";"`echo "cd $PWD;     timing_wrapper.sh $timing_dest/similarity/0.99/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --similarity 0.99 -o $output_dest/similarity/0.99/$i" | qsub -k oe -N test5 -q friendlyq -m abe`
+    jobs_to_start_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/jobs_to_start/8/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --jobs_to_start 8 -o $output_dest/jobs_to_start/8/$i" | qsub -k oe -N test0 -q friendlyq -m abe`
+    jobs_to_start_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/jobs_to_start/16/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --jobs_to_start 16 -o $output_dest/jobs_to_start/16/$i" | qsub -k oe -N test1 -q friendlyq -m abe`
+    jobs_to_start_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/jobs_to_start/32/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --jobs_to_start 32 -o $output_dest/jobs_to_start/32/$i" | qsub -k oe -N test2 -q friendlyq -m abe`
+    similarity_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/similarity/0.94/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --similarity 0.94 -o $output_dest/similarity/0.94/$i" | qsub -k oe -N test3 -q friendlyq -m abe`
+    similarity_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/similarity/0.97/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --similarity 0.97 -o $output_dest/similarity/0.97/$i" | qsub -k oe -N test4 -q friendlyq -m abe`
+    similarity_jobs+=","`echo "cd $PWD;     timing_wrapper.sh $timing_dest/similarity/0.99/$i.txt parallel_pick_otus_uclust_ref.py -r ref_file.fna -i input.fna --similarity 0.99 -o $output_dest/similarity/0.99/$i" | qsub -k oe -N test5 -q friendlyq -m abe`
 done
 
 # Get the benchmark results and produce the plots
