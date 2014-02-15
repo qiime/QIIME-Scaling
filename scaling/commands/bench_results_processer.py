@@ -12,8 +12,9 @@ __status__ = "Development"
 
 from pyqi.core.command import (Command, CommandIn, CommandOut,
                                ParameterCollection)
-from scaling.process_results import process_benchmark_results
 from matplotlib.figure import Figure
+from scaling.process_results import process_benchmark_results
+from scaling.cluster_util import wait_on
 
 
 class BenchResultsProcesser(Command):
@@ -51,8 +52,10 @@ class BenchResultsProcesser(Command):
         input_dir = kwargs['input_dir']
         job_ids = kwargs['job_ids']
 
+        wait_on(job_ids)
+
         data, time_fig, time_str, mem_fig, mem_str = \
-            process_benchmark_results(input_dir, job_ids)
+            process_benchmark_results(input_dir)
 
         result['bench_data'] = data
         result['time_fig'] = time_fig

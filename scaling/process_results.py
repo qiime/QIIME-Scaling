@@ -107,6 +107,7 @@ def process_timing_directory(timing_dir):
     # Return the output dictionary
     return data
 
+
 def compute_rsquare(y, SSerr):
     """Computes the Rsquare value using the points y and the Sum of Squares
 
@@ -125,10 +126,11 @@ def compute_rsquare(y, SSerr):
             SStot = sum( (y-mean)^2 )
     """
     mean = np.mean(y)
-    SStot = np.sum( (y-mean)**2 )
+    SStot = np.sum((y-mean)**2)
     rsquare = 1 - (SSerr/SStot)
 
     return rsquare
+
 
 def curve_fitting(x, y):
     """Fits a polynomial curve to the data points defined by the arrays x and y
@@ -151,6 +153,7 @@ def curve_fitting(x, y):
 
     return poly, deg
 
+
 def generate_poly_label(poly, deg):
     """Returns a string representing the given polynomial
 
@@ -163,6 +166,7 @@ def generate_poly_label(poly, deg):
         s += str(poly[i]) + "*x^" + str(deg-i) + " + "
     s += str(poly[deg])
     return s
+
 
 def make_bench_plot(data, fit_key, keys, title, ylabel, scale=1):
     """Creates a matplotlib figure with the benchmark results present in data
@@ -186,7 +190,7 @@ def make_bench_plot(data, fit_key, keys, title, ylabel, scale=1):
     poly, deg = curve_fitting(x, data[fit_key][0])
     poly_label = generate_poly_label(poly, deg)
     y = np.polyval(poly, x2)
-    y = y /scale
+    y = y / scale
     figure = plt.figure()
     ax = figure.add_subplot(111)
     ax.plot(x2, y, 'k', label=poly_label)
@@ -198,11 +202,11 @@ def make_bench_plot(data, fit_key, keys, title, ylabel, scale=1):
         ax.errorbar(x, y, yerr=y_err, label=key)
     fontP = FontProperties()
     fontP.set_size('small')
-    # figure.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
     figure.suptitle(title)
     ax.set_xlabel('Input file')
     ax.set_ylabel(ylabel)
     return figure, poly_label
+
 
 def process_benchmark_results(input_dir):
     """Processes the benchmark results stored in input_dir
@@ -229,6 +233,7 @@ def process_benchmark_results(input_dir):
                                          "Memory (GB)", scale=1024*1024)
     return data, time_plot, time_poly, mem_plot, mem_poly
 
+
 def make_comparison_plot(data, x_axis, key, title, ylabel, scale=1):
     """Creates a matplotlib figure with the benchmark results of multiple runs
 
@@ -250,6 +255,7 @@ def make_comparison_plot(data, x_axis, key, title, ylabel, scale=1):
     ax.set_ylabel(ylabel)
     return figure
 
+
 def compare_benchmark_results(input_dirs, labels):
     """Compares in a single plot the benchmark results listed in input_dirs
 
@@ -258,8 +264,8 @@ def compare_benchmark_results(input_dirs, labels):
             results
         labels: list of strings to label the plot data series
 
-    Note: raises a ValueError if all the benchmark results doesn't belong to the
-        same bench suite
+    Note: raises a ValueError if all the benchmark results doesn't belong to
+        the same bench suite
     """
     # Get the benchmark results
     data = {}
@@ -274,10 +280,11 @@ def compare_benchmark_results(input_dirs, labels):
         else:
             if set(x_axis) != set(d['label']):
                 raise ValueError("In order to compare different benchmark "
-                    "results, they should be over the same set of test cases")
+                                 "results, they should be over the same set of"
+                                 " test cases")
     # Generate comparison plots
     time_fig = make_comparison_plot(data, x_axis, 'wall_time', 'Running time',
                                     'Time (seconds)')
-    mem_fig = make_comparison_plot(data, x_axis, 'memory', 'Memory usage', 
+    mem_fig = make_comparison_plot(data, x_axis, 'memory', 'Memory usage',
                                    'Memory (GB)', scale=1024*1024)
     return time_fig, mem_fig
