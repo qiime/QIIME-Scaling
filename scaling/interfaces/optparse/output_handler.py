@@ -10,10 +10,11 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 from pyqi.core.exception import IncompetentDeveloperError
-from pyqi.core.interfaces.optparse.output_handler import (write_list_of_strings,
-                                                          write_string)
+from pyqi.core.interfaces.optparse.output_handler import \
+    write_list_of_strings, write_string
 import os
 import numpy as np
+
 
 def write_summarized_results(result_key, data, option_value=None):
     """Write the benchmark results in a tab-delimited format
@@ -21,8 +22,8 @@ def write_summarized_results(result_key, data, option_value=None):
     option_value is the base output directory
 
     Writes a file with the benchmark results in a tab-delimited form,
-    with the following headers: label, wall_mean, wall_std, user_mean, user_std,
-    kernel_mean, kernel_std, mem_mean, mem_std
+    with the following headers: label, wall_mean, wall_std, user_mean,
+    user_std, kernel_mean, kernel_std, mem_mean, mem_std
     Each row contains the results for a single experiment
     """
 
@@ -32,8 +33,8 @@ def write_summarized_results(result_key, data, option_value=None):
 
     if os.path.exists(option_value):
         if os.path.isfile(option_value):
-            raise IOError("Output directory '%s' already exists and it is a file."
-                      % option_value)
+            raise IOError("Output directory '%s' already exists and it is a "
+                          "file." % option_value)
     else:
         os.mkdir(option_value)
 
@@ -41,7 +42,7 @@ def write_summarized_results(result_key, data, option_value=None):
 
     lines = []
     headers = ["#label", "wall_mean", "wall_std", "user_mean", "user_std",
-        "kernel_mean", "kernel_std", "mem_mean", "mem_std"]
+               "kernel_mean", "kernel_std", "mem_mean", "mem_std"]
     lines.append("\t".join(headers))
     # Loop over all the experiments
     for i, label in enumerate(data['label']):
@@ -55,8 +56,9 @@ def write_summarized_results(result_key, data, option_value=None):
         values.append(str(data['memory'][0][i]))
         values.append(str(data['memory'][1][i]))
         lines.append("\t".join(values))
-    
+
     write_list_of_strings(result_key, lines, option_value=output_fp)
+
 
 def write_matplotlib_figure(result_key, data, option_value=None):
     """Write a matplotlib figure to disk
@@ -69,8 +71,8 @@ def write_matplotlib_figure(result_key, data, option_value=None):
 
     if os.path.exists(option_value):
         if os.path.isfile(option_value):
-            raise IOError("Output directory '%s' already exists and it is a file."
-                      % option_value)
+            raise IOError("Output directory '%s' already exists and it is a "
+                          "file." % option_value)
     else:
         os.mkdir(option_value)
 
@@ -79,6 +81,7 @@ def write_matplotlib_figure(result_key, data, option_value=None):
         raise IOError("Output path %s already exists." % output_fp)
 
     data.savefig(output_fp)
+
 
 def write_string_to_dir(result_key, data, option_value=None):
     """Write a string to a file
@@ -91,8 +94,8 @@ def write_string_to_dir(result_key, data, option_value=None):
 
     if os.path.exists(option_value):
         if os.path.isfile(option_value):
-            raise IOError("Output directory '%s' already exists and it is a file."
-                      % option_value)
+            raise IOError("Output directory '%s' already exists and it is a "
+                          "file." % option_value)
     else:
         os.mkdir(option_value)
 

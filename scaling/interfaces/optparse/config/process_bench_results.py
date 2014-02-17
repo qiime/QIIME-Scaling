@@ -15,9 +15,10 @@ from pyqi.core.interfaces.optparse import (OptparseUsageExample,
 from pyqi.core.command import (make_command_in_collection_lookup_f,
                                make_command_out_collection_lookup_f)
 from pyqi.core.interfaces.optparse.input_handler import string_list_handler
+
 from scaling.commands.bench_results_processer import CommandConstructor
 from scaling.interfaces.optparse.output_handler import \
-    (write_summarized_results, write_matplotlib_figure, write_string_to_dir)
+    write_summarized_results, write_matplotlib_figure, write_string_to_dir
 
 # Convenience function for looking up parameters by name.
 cmd_in_lookup = make_command_in_collection_lookup_f(CommandConstructor)
@@ -26,9 +27,19 @@ cmd_out_lookup = make_command_out_collection_lookup_f(CommandConstructor)
 # Examples of how the command can be used from the command line using an
 # optparse interface.
 usage_examples = [
-    OptparseUsageExample(ShortDesc="A short single sentence description of the example",
-                         LongDesc="A longer, more detailed description",
-                         Ex="%prog --foo --bar some_file")
+    OptparseUsageExample(ShortDesc="Processes the benchmark suite results",
+                         LongDesc="Takes the benchmark suite output directory "
+                         "and processes the benchmark measurements, creating "
+                         "plots and collapsing results in a usable form.",
+                         Ex="%prog -i timing -o plots"),
+    OptparseUsageExample(ShortDesc="Wait for a set of PBS jobs to complete and"
+                         " process the benchmark suite results",
+                         LongDesc="Takes a list of PBS job ids, wait for its "
+                         "completion and then takes the benchmark suite output"
+                         " directory and processes the benchmark measurements,"
+                         " creating plots and collapsing results in a usable "
+                         "form.",
+                         Ex="%prog -i timing -o plots -w 124311,124312,124313")
 ]
 
 # inputs map command line arguments and values onto Parameters. It is possible

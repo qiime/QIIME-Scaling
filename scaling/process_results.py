@@ -13,10 +13,11 @@ from os import listdir, mkdir
 from os.path import join, isdir, exists
 import numpy as np
 from matplotlib import use
-use('Agg',warn=False)
+use('Agg', warn=False)
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 from scaling.util import natural_sort
+
 
 def process_timing_directory(timing_dir):
     """Retrieves the timing results stored in timing_dir in a dict form
@@ -56,8 +57,8 @@ def process_timing_directory(timing_dir):
         dirpath = join(timing_dir, dirname)
         # Check if it is not a directory - raise a ValueError if True
         if not isdir(dirpath):
-            raise ValueError, "%s contains a file: %s." % (timing_dir,
-                dirpath) + "Only directories are allowed!"
+            raise ValueError("%s contains a file: %s. Only directories are "
+                             "allowed!" % (timing_dir, dirpath))
 
         # Initialize lists for bench results
         wall_time = []

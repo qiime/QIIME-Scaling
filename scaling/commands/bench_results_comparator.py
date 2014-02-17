@@ -10,18 +10,19 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
-from pyqi.core.command import (Command, CommandIn, CommandOut, 
+from pyqi.core.command import (Command, CommandIn, CommandOut,
                                ParameterCollection)
 from pyqi.core.exception import CommandError
 from scaling.process_results import compare_benchmark_results
 from matplotlib.figure import Figure
 
+
 class BenchResultsComparator(Command):
     BriefDescription = "Compare different runs results of the same bench suite"
     LongDescription = ("Takes a list with paths to directories with benchmark "
-        "results and generates a plot with the wall time  and a plot with the "
-        "memory consumption of the different runs, allowing performance "
-        "comparison between them.")
+                       "results and generates a plot with the wall time and a "
+                       "plot with the memory consumption of the different "
+                       "runs, allowing performance comparison between them.")
     CommandIns = ParameterCollection([
         CommandIn(Name='input_dirs', DataType=list,
                   Description='List with the path to the directories with the '
@@ -34,9 +35,10 @@ class BenchResultsComparator(Command):
 
     CommandOuts = ParameterCollection([
         CommandOut(Name="time_fig", DataType=Figure,
-            Description="matplotlib figure with the wall time plot"),
+                   Description="matplotlib figure with the wall time plot"),
         CommandOut(Name="mem_fig", DataType=Figure,
-            Description="matplotlib figure with the memory consumption plot"),
+                   Description="matplotlib figure with the memory consumption "
+                               "plot"),
     ])
 
     def run(self, **kwargs):
@@ -47,13 +49,13 @@ class BenchResultsComparator(Command):
 
         if len(input_dirs) < 2:
             raise CommandError("You should provide at least two directories "
-                "with the benchmark results")
+                               "with the benchmark results")
 
         time_fig, mem_fig = compare_benchmark_results(input_dirs, labels)
 
         result['time_fig'] = time_fig
         result['mem_fig'] = mem_fig
-        
+
         return result
 
 CommandConstructor = BenchResultsComparator

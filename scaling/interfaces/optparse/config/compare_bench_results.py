@@ -15,6 +15,7 @@ from pyqi.core.interfaces.optparse import (OptparseUsageExample,
 from pyqi.core.command import (make_command_in_collection_lookup_f,
                                make_command_out_collection_lookup_f)
 from pyqi.core.interfaces.optparse.input_handler import string_list_handler
+
 from scaling.commands.bench_results_comparator import CommandConstructor
 from scaling.interfaces.optparse.output_handler import write_matplotlib_figure
 
@@ -25,9 +26,14 @@ cmd_out_lookup = make_command_out_collection_lookup_f(CommandConstructor)
 # Examples of how the command can be used from the command line using an
 # optparse interface.
 usage_examples = [
-    OptparseUsageExample(ShortDesc="A short single sentence description of the example",
-                         LongDesc="A longer, more detailed description",
-                         Ex="%prog --foo --bar some_file")
+    OptparseUsageExample(ShortDesc="Compare different runs results of the same"
+                         " bench suite",
+                         LongDesc="Takes a comma-separated list with paths to "
+                         "directories with benchmark results and generates a "
+                         "plot with the wall time and a plot with the memory "
+                         "consumption of the different runs, allowing "
+                         "performance comparison between them.",
+                         Ex="%prog -i timing1,timing2 -l run1,run2 -o plots")
 ]
 
 # inputs map command line arguments and values onto Parameters. It is possible
@@ -35,21 +41,23 @@ usage_examples = [
 inputs = [
     OptparseOption(Parameter=cmd_in_lookup('input_dirs'),
                    Type='existing_dirpaths',
-                   Action='store', # default is 'store', change if desired
-                   Handler=None, # must be defined if desired
-                   ShortName='i', # must be defined if desired
-                   # Name='input_dirs', # implied by Parameter
-                   # Required=True, # implied by Parameter
-                   # Help='List with the path to the directories with the time results of different runs of the same bench suite', # implied by Parameter
+                   Action='store',
+                   Handler=None,
+                   ShortName='i',
+                   # Name='input_dirs',
+                   # Required=True,
+                   # Help='List with the path to the directories with the time
+                   #    results of different runs of the same bench suite',
                    ),
     OptparseOption(Parameter=cmd_in_lookup('labels'),
                    Type='str',
-                   Action='store', # default is 'store', change if desired
-                   Handler=string_list_handler, # must be defined if desired
-                   ShortName='l', # must be defined if desired
-                   # Name='labels', # implied by Parameter
-                   # Required=True, # implied by Parameter
-                   # Help='List of strings to label each data series on the plot', # implied by Parameter
+                   Action='store',
+                   Handler=string_list_handler,
+                   ShortName='l',
+                   # Name='labels',
+                   # Required=True,
+                   # Help='List of strings to label each data series on the
+                   #    plot'
                    ),
     OptparseOption(Parameter=None,
                    Type='new_dirpath',
@@ -64,9 +72,9 @@ inputs = [
 # inputs list (above).
 outputs = [
     OptparseResult(Parameter=cmd_out_lookup('mem_fig'),
-                    Handler=write_matplotlib_figure,
-                    InputName='output-dir'),
+                   Handler=write_matplotlib_figure,
+                   InputName='output-dir'),
     OptparseResult(Parameter=cmd_out_lookup('time_fig'),
-                    Handler=write_matplotlib_figure,
-                    InputName='output-dir'),
+                   Handler=write_matplotlib_figure,
+                   InputName='output-dir'),
 ]

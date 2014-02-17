@@ -20,9 +20,8 @@ from scaling.make_bench_suite import (make_bench_suite_files,
 class BenchSuiteMaker(Command):
     BriefDescription = "Generates a benchmark suite file"
     LongDescription = ("Given a command and a list of benchmarks files or a "
-                       "dictionary with the options to test, %prog generates a"
-                       " shell script that executes a complete benchmark "
-                       "suite.")
+                       "dictionary with the options to test, generates a shell"
+                       " script that executes a complete benchmark suite.")
     CommandIns = ParameterCollection([
         CommandIn(Name='command', DataType=str,
                   Description='command to benchmark', Required=True),
