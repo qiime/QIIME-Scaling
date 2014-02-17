@@ -9,8 +9,8 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
-import subprocess
-import os
+from subprocess import Popen
+from os import environ
 from time import sleep
 
 
@@ -25,10 +25,10 @@ def check_status(jobs_to_monitor):
             running
     """
     # Get all the commands running pf the current user
-    user = os.environ['USER']
+    user = environ['USER']
     qstat_cmd = "qstat | grep %s" % user
-    proc = subprocess.Popen(qstat_cmd, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, shell=True)
+    proc = Popen(qstat_cmd, stdout=subprocess.PIPE,
+                 stderr=subprocess.PIPE, shell=True)
     (stdout, stderr) = proc.communicate()
     # Parse the qstat output
     lines = stdout.splitlines()
