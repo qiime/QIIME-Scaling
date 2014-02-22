@@ -61,6 +61,7 @@ inputs = [
                    ShortName='w',
                    Name='wait_on',
                    Required=False,
+                   Default="",
                    Help='Comma-separated list of job ids to wait for before '
                         'processing the results'),
     OptparseOption(Parameter=None,
