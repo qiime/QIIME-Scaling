@@ -35,7 +35,7 @@ fi
 #         that the process has been not running due to scheduling
 #
 #  We use this output format because it is easy to parse
-/usr/bin/time -o $output_fp -f"%e;%U;%S;%M" $cmd $args > /dev/null 2> /dev/null
+/usr/bin/time -o $output_fp -f"%e;%U;%S;%M" $cmd $args
 
 # Check if the command cmd has finished correctly
 #  If cmd has finished on success, the time output file will
