@@ -11,26 +11,30 @@ __status__ = "Development"
 
 import sys
 from StringIO import StringIO
-import re
+from re import split
+
 
 class OutputRedirect:
     """Class to redirect the std output to StringIO using a `with` statement"""
     saved_stdout = None
+
     def __enter__(self):
         self.saved_stdout = sys.stdout
         out = StringIO()
         sys.stdout = out
         return out
+
     def __exit__(self, type, value, tb):
         sys.stdout = self.saved_stdout
 
-def natural_sort( l ): 
+
+def natural_sort(l):
     """ Sort the given list in the way that humans expect.
         Code adapted from:
             http://www.codinghorror.com/blog/2007/12/
                 sorting-for-humans-natural-sort-order.html
-    """ 
-    convert = lambda text: int(text) if text.isdigit() else text 
-    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
-    l.sort( key=alphanum_key )
+    """
+    convert = lambda text: int(text) if text.isdigit() else text
+    alphanum_key = lambda key: [convert(c) for c in split('([0-9]+)', key)]
+    l.sort(key=alphanum_key)
     return l

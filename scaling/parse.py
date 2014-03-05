@@ -9,6 +9,7 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
+
 def parse_parameters_file(lines):
     """Parses the parameters file encoded in lines and returns it as a dict
 
