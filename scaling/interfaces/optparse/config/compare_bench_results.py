@@ -17,7 +17,7 @@ from pyqi.core.command import (make_command_in_collection_lookup_f,
 from pyqi.core.interfaces.optparse.input_handler import string_list_handler
 
 from scaling.commands.bench_results_comparator import CommandConstructor
-from scaling.interfaces.optparse.output_handler import (
+from scaling.interfaces.optparse.input_handler import (
     load_summarized_results_list)
 from scaling.interfaces.optparse.output_handler import write_comparison_results
 
@@ -73,7 +73,7 @@ inputs = [
 # to supply an associated option, but if you do, it must be an option from the
 # inputs list (above).
 outputs = [
-    OptparseResult(Parameter=cmd_out_lookup('data'),
+    OptparseResult(Parameter=cmd_out_lookup('comp_data'),
                    Handler=write_comparison_results,
                    InputName='output-dir'),
 ]

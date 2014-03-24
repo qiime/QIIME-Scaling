@@ -18,6 +18,7 @@ from pyqi.core.exception import IncompetentDeveloperError
 from pyqi.core.interfaces.optparse.output_handler import write_list_of_strings
 
 from scaling.util import generate_poly_label
+from scaling.draw import make_bench_plot, make_comparison_plot
 
 
 def write_bench_results(result_key, data, option_value=None):
@@ -98,3 +99,43 @@ def write_bench_results(result_key, data, option_value=None):
     make_bench_plot(x, ys, y_errors, "Memory usage", "Memory (MB)",
                     data.mem_curve.poly, data.mem_curve.deg, mem_plot_fp,
                     scale=1024)
+
+
+def write_comparison_results(result_key, data, option_value=None):
+    """Output handler for the bench_results_processer command
+
+    Parameters
+    ----------
+    result_key : string
+        The key used in the results dictionary
+    data : CompData namedtuple
+        The results of the command
+    option_value : string
+        Path to the output directory
+
+    Raises
+    ------
+    IOError
+        If the output directory exists and it's a file
+    """
+    # Check that we are not dealing with incompetent developers
+    if option_value is None:
+        raise IncompetentDeveloperError("Cannot write output without an "
+                                        "output directory.")
+
+    # Check that the output directory exists
+    if os.path.exists(option_value):
+        # Check that it is not a file, so we can use it
+        if os.path.isfile(option_value):
+            raise IOError("Output directory '%s' already exists and it is a "
+                          "file." % option_value)
+    else:
+        # The output directory does not exists, create it
+        os.mkdir(option_value)
+    # Create the plots with the benchmark comparison
+    time_plot_fp = join(option_value, "time_fig.png")
+    make_comparison_plot(data.x, data.time, "Running time", "Time (seconds)",
+                         time_plot_fp)
+    mem_plot_fp = join(option_value, "mem_fig.png")
+    make_comparison_plot(data.x, data.mem, "Memory usage", "Memory (MB)",
+                         mem_plot_fp, scale=1024)
