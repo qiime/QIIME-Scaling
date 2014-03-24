@@ -13,8 +13,8 @@ __status__ = "Development"
 from pyqi.core.command import (Command, CommandIn, CommandOut,
                                ParameterCollection)
 from pyqi.core.exception import CommandError
+
 from scaling.process_results import compare_benchmark_results
-from matplotlib.figure import Figure
 
 
 class BenchResultsComparator(Command):
