@@ -17,8 +17,8 @@ from pyqi.core.command import (make_command_in_collection_lookup_f,
 from pyqi.core.interfaces.optparse.input_handler import string_list_handler
 
 from scaling.commands.bench_results_processer import CommandConstructor
-from scaling.interfaces.optparse.output_handler import \
-    write_summarized_results, write_matplotlib_figure, write_string_to_dir
+from scaling.interfaces.optparse.output_handler import write_bench_results
+from scaling.interfaces.optparse.input_handler import parse_timing_directory
 
 # Convenience function for looking up parameters by name.
 cmd_in_lookup = make_command_in_collection_lookup_f(CommandConstructor)
@@ -45,14 +45,14 @@ usage_examples = [
 # inputs map command line arguments and values onto Parameters. It is possible
 # to define options here that do not exist as parameters, e.g., an output file.
 inputs = [
-    OptparseOption(Parameter=cmd_in_lookup('input_dir'),
+    OptparseOption(Parameter=cmd_in_lookup('bench_results'),
                    Type='existing_dirpath',
                    Action='store',
-                   Handler=None,
+                   Handler=parse_timing_directory,
                    ShortName='i',
-                   # Name='input_dir',
-                   # Required=True,
-                   # Help='Path to the directory with the time results',
+                   Name='input_dir',
+                   Required=True,
+                   Help='Path to the directory with the time results',
                    ),
     OptparseOption(Parameter=cmd_in_lookup('job_ids'),
                    Type='str',
@@ -61,7 +61,6 @@ inputs = [
                    ShortName='w',
                    Name='wait_on',
                    Required=False,
-                   Default="",
                    Help='Comma-separated list of job ids to wait for before '
                         'processing the results'),
     OptparseOption(Parameter=None,
@@ -77,18 +76,6 @@ inputs = [
 # inputs list (above).
 outputs = [
     OptparseResult(Parameter=cmd_out_lookup('bench_data'),
-                   Handler=write_summarized_results,
-                   InputName='output-dir'),
-    OptparseResult(Parameter=cmd_out_lookup('mem_fig'),
-                   Handler=write_matplotlib_figure,
-                   InputName='output-dir'),
-    OptparseResult(Parameter=cmd_out_lookup('mem_str'),
-                   Handler=write_string_to_dir,
-                   InputName='output-dir'),
-    OptparseResult(Parameter=cmd_out_lookup('time_fig'),
-                   Handler=write_matplotlib_figure,
-                   InputName='output-dir'),
-    OptparseResult(Parameter=cmd_out_lookup('time_str'),
-                   Handler=write_string_to_dir,
+                   Handler=write_bench_results,
                    InputName='output-dir'),
 ]

@@ -38,3 +38,19 @@ def natural_sort(l):
     alphanum_key = lambda key: [convert(c) for c in split('([0-9]+)', key)]
     l.sort(key=alphanum_key)
     return l
+
+
+def generate_poly_label(poly, deg):
+    """Returns a string representing the given polynomial
+
+    Input:
+        poly: numpy array of float
+        deg: float
+    """
+    s = []
+    for i in range(deg):
+        s.append("%s*x^%s + " % (poly[i], deg-i))
+        # s += str(poly[i]) + "*x^" + str(deg-i) + " + "
+    s.append(str(poly[deg]))
+    # s += str(poly[deg])
+    return "".join(s)

@@ -12,7 +12,7 @@ __status__ = "Development"
 
 from pyqi.core.command import (Command, CommandIn, CommandOut,
                                ParameterCollection)
-from matplotlib.figure import Figure
+
 from scaling.process_results import process_benchmark_results
 from scaling.cluster_util import wait_on
 
@@ -23,8 +23,8 @@ class BenchResultsProcesser(Command):
                        "processes the benchmark measurements, creating plots "
                        "and collapsing results in a usable form.")
     CommandIns = ParameterCollection([
-        CommandIn(Name='input_dir', DataType=str,
-                  Description='Path to the directory with the time results',
+        CommandIn(Name='bench_results', DataType=list,
+                  Description='List with the benchmark results',
                   Required=True),
         CommandIn(Name='job_ids', DataType=list,
                   Description='List of job ids to wait for if running in a '
@@ -34,34 +34,19 @@ class BenchResultsProcesser(Command):
     CommandOuts = ParameterCollection([
         CommandOut(Name="bench_data", DataType=dict,
                    Description="Dictionary with the benchmark results"),
-        CommandOut(Name="time_fig", DataType=Figure,
-                   Description="Figure with the execution time results"),
-        CommandOut(Name="time_str", DataType=str,
-                   Description="String with the best polynomial fit to the "
-                   "benchmark execution time results"),
-        CommandOut(Name="mem_fig", DataType=Figure,
-                   Description="Figure with the memory consumption results"),
-        CommandOut(Name="mem_str", DataType=str,
-                   Description="String with the best polynomial fit to the "
-                   "benchmark memory consumption results")
     ])
 
     def run(self, **kwargs):
         result = {}
 
-        input_dir = kwargs['input_dir']
+        bench_results = kwargs['bench_results']
         job_ids = kwargs['job_ids']
 
         wait_on(job_ids)
 
-        data, time_fig, time_str, mem_fig, mem_str = \
-            process_benchmark_results(input_dir)
+        data = process_benchmark_results(bench_results)
 
         result['bench_data'] = data
-        result['time_fig'] = time_fig
-        result['time_str'] = time_str
-        result['mem_fig'] = mem_fig
-        result['mem_str'] = mem_str
 
         return result
 

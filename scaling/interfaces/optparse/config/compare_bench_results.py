@@ -17,7 +17,9 @@ from pyqi.core.command import (make_command_in_collection_lookup_f,
 from pyqi.core.interfaces.optparse.input_handler import string_list_handler
 
 from scaling.commands.bench_results_comparator import CommandConstructor
-from scaling.interfaces.optparse.output_handler import write_matplotlib_figure
+from scaling.interfaces.optparse.output_handler import (
+    load_summarized_results_list)
+from scaling.interfaces.optparse.output_handler import write_comparison_results
 
 # Convenience function for looking up parameters by name.
 cmd_in_lookup = make_command_in_collection_lookup_f(CommandConstructor)
@@ -39,25 +41,25 @@ usage_examples = [
 # inputs map command line arguments and values onto Parameters. It is possible
 # to define options here that do not exist as parameters, e.g., an output file.
 inputs = [
-    OptparseOption(Parameter=cmd_in_lookup('input_dirs'),
-                   Type='existing_dirpaths',
+    OptparseOption(Parameter=cmd_in_lookup('bench_results'),
+                   Type='existing_filepaths',
                    Action='store',
-                   Handler=None,
+                   Handler=load_summarized_results_list,
                    ShortName='i',
-                   # Name='input_dirs',
-                   # Required=True,
-                   # Help='List with the path to the directories with the time
-                   #    results of different runs of the same bench suite',
+                   Name='input_dirs',
+                   Required=True,
+                   Help="Comma-separated list with the paths to the "
+                        "directories of the time results of different runs of "
+                        "the same bench suite",
                    ),
     OptparseOption(Parameter=cmd_in_lookup('labels'),
                    Type='str',
                    Action='store',
                    Handler=string_list_handler,
                    ShortName='l',
-                   # Name='labels',
-                   # Required=True,
-                   # Help='List of strings to label each data series on the
-                   #    plot'
+                   Name='labels',
+                   Required=True,
+                   Help='List of strings to label each data series of the plot'
                    ),
     OptparseOption(Parameter=None,
                    Type='new_dirpath',
@@ -71,10 +73,7 @@ inputs = [
 # to supply an associated option, but if you do, it must be an option from the
 # inputs list (above).
 outputs = [
-    OptparseResult(Parameter=cmd_out_lookup('mem_fig'),
-                   Handler=write_matplotlib_figure,
-                   InputName='output-dir'),
-    OptparseResult(Parameter=cmd_out_lookup('time_fig'),
-                   Handler=write_matplotlib_figure,
+    OptparseResult(Parameter=cmd_out_lookup('data'),
+                   Handler=write_comparison_results,
                    InputName='output-dir'),
 ]
