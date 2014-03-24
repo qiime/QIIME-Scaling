@@ -42,7 +42,7 @@ def make_bench_plot(x, ys, y_errors, title, ylabel, poly, deg, output_fp,
         Degree of the polynomial
     output_fp : string
         The path to the output figure
-    scale : numerical, optional
+    scale : number, optional
         Value used to scale the y values (default: 1, no scale is performed)
     """
     # Check if the x axis is numerical
@@ -72,6 +72,38 @@ def make_bench_plot(x, ys, y_errors, title, ylabel, poly, deg, output_fp,
     fontP.set_size('small')
     figure.suptitle(title)
     ax.set_xlabel("Input file")
+    ax.set_ylabel(ylabel)
+    ax.legend(loc='best')
+    ax.savefig(output_fp)
+
+
+def make_comparison_plot(x_axis, data, title, ylabel, output_fp, scale=1):
+    """Generates a plot for performance comparison
+
+    Parameters
+    ----------
+    x_axis : list
+        The values for the x axis
+    data : dict
+        Dict of {label : list} in which each data series to be plotted is keyed
+        by its label
+    title : string
+        Plot title
+    ylabel : string
+        The y axis label
+    output_fp : string
+        The path to the output figure
+    scale : number, optional
+        Value used to scale the y values (default: 1, no scale is performed)
+    """
+    figure = plt.figure()
+    ax = figure.add_subplot(111)
+    for label, values in data.iteritems():
+        y = np.array(values[0]) / scale
+        y_err = np.array(values[1]) / scale
+        ax.errorbar(x_axis, y, yerr=y_err, label=label)
+    figure.suptitle(title)
+    ax.set_xlabel('Input file')
     ax.set_ylabel(ylabel)
     ax.legend(loc='best')
     ax.savefig(output_fp)

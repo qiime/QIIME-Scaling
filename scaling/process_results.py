@@ -18,6 +18,8 @@ import numpy as np
 
 from scaling.util import natural_sort
 
+CompData = namedtuple('CompData', ('x', 'time', 'mem'))
+
 
 def compute_rsquare(y, SSerr):
     """Computes the Rsquare value using the points y and the Sum of Squares
@@ -122,74 +124,15 @@ def compare_benchmark_results(results, labels):
     labels : Iterable
         The label for each data series
     """
-    x_axis = None
-    comp_data = {}
+    comp_data = {None, {}, {}}
     for label, res in izip(labels, results):
-        if not x_axis:
-            x_axis = res.label
+        if not comp_data.x:
+            comp_data.x = res.label
         else:
-            if set(x_axis) != set(res.label):
+            if set(comp_data.x) != set(res.label):
                 raise ValueError("In order to compare different benchmark "
                                  "results, they should be over the same set of"
                                  " test cases")
-        data[label] = res.mean
-    return x_axis, data
-
-
-def compare_benchmark_results(bench_results, labels):
-    """Compares in a single plot the benchmark results listed in input_dirs
-
-    Parameters
-    ----------
-    bench_results : Iterable
-        The results of the different runs of the same benchmark suite
-
-    labels : Iterable
-        The label of each data series
-
-    Note: raises a ValueError if all the benchmark results doesn't belong to
-        the same bench suite
-    """
-    # Get the benchmark results
-    data = {}
-    for in_dir, label in zip(input_dirs, labels):
-        d = process_timing_directory(in_dir)
-        data[label] = d
-    # Check that all the provided results correspond to the same bench suite
-    x_axis = None
-    for l, d in data.iteritems():
-        if x_axis is None:
-            x_axis = d['label']
-        else:
-            if set(x_axis) != set(d['label']):
-                raise ValueError("In order to compare different benchmark "
-                                 "results, they should be over the same set of"
-                                 " test cases")
-    # Generate comparison plots
-    time_fig = make_comparison_plot(data, x_axis, 'wall_time', 'Running time',
-                                    'Time (seconds)')
-    mem_fig = make_comparison_plot(data, x_axis, 'memory', 'Memory usage',
-                                   'Memory (GB)', scale=1024*1024)
-    return time_fig, mem_fig
-
-
-def make_comparison_plot(data, x_axis, key, title, ylabel, scale=1):
-    """Creates a matplotlib figure with the benchmark results of multiple runs
-
-    Input:
-        data: dictionary with the benchmark results
-        x_axis: array to use as X axis values
-        key: key of data to plot in the figure
-        scale: value to use as a scaling factor for the values in data
-    """
-    figure = plt.figure()
-    ax = figure.add_subplot(111)
-    for d in data:
-        y, y_err = data[d][key]
-        y = np.array(y) / scale
-        y_err = np.array(y_err) / scale
-        ax.errorbar(x_axis, y, yerr=y_err, label=d)
-    figure.suptitle(title)
-    ax.set_xlabel('Input file')
-    ax.set_ylabel(ylabel)
-    return figure
+        comp_data.time[label] = (res.wall_mean, res.wall_stdev)
+        comp_data.mem[label] = (res.mem_mean, res.mem_stdev)
+    return comp_data

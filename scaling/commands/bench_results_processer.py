@@ -13,7 +13,7 @@ __status__ = "Development"
 from pyqi.core.command import (Command, CommandIn, CommandOut,
                                ParameterCollection)
 
-from scaling.process_results import process_benchmark_results
+from scaling.process_results import (process_benchmark_results, CompData)
 from scaling.cluster_util import wait_on
 
 
@@ -32,7 +32,7 @@ class BenchResultsProcesser(Command):
     ])
 
     CommandOuts = ParameterCollection([
-        CommandOut(Name="bench_data", DataType=dict,
+        CommandOut(Name="bench_data", DataType=CompData,
                    Description="Dictionary with the benchmark results"),
     ])
 
