@@ -28,7 +28,7 @@ class BenchResultsProcesser(Command):
                   Required=True),
         CommandIn(Name='job_ids', DataType=list,
                   Description='List of job ids to wait for if running in a '
-                  'pbs cluster', Required=False, Default=[])
+                  'pbs cluster', Required=False)
     ])
 
     CommandOuts = ParameterCollection([
@@ -42,7 +42,8 @@ class BenchResultsProcesser(Command):
         bench_results = kwargs['bench_results']
         job_ids = kwargs['job_ids']
 
-        wait_on(job_ids)
+        if job_ids:
+            wait_on(job_ids)
 
         data = process_benchmark_results(bench_results)
 

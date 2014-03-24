@@ -20,8 +20,8 @@ from itertools import izip
 from scaling.util import generate_poly_label
 
 
-def make_bench_plot(x, ys, y_errors, title, ylabel, poly, deg, output_fp,
-                    scale=1):
+def make_bench_plot(x, ys, y_errors, labels, title, ylabel, poly, deg,
+                    output_fp, scale=1):
     """Generates a plot with the benchmark results
 
     Parameters
@@ -32,6 +32,8 @@ def make_bench_plot(x, ys, y_errors, title, ylabel, poly, deg, output_fp,
         Each element of the list a series of data to plot
     y_errors : list of lists
         Values of the errorbars for each data series
+    labels : list of strings
+        Data series names
     title : string
         The plot title
     ylabel : string
@@ -48,7 +50,7 @@ def make_bench_plot(x, ys, y_errors, title, ylabel, poly, deg, output_fp,
     # Check if the x axis is numerical
     x_ticks = x
     try:
-        x = asarray(x, dtype=np.float64)
+        x = np.asarray(x, dtype=np.float64)
     except ValueError:
         x = np.arange(len(x))
     # For the function resulted from curve fitting, we use an extended x axis,
@@ -64,25 +66,27 @@ def make_bench_plot(x, ys, y_errors, title, ylabel, poly, deg, output_fp,
     ax = figure.add_subplot(111)
     ax.plot(x2, y2, 'k', label=generate_poly_label(poly, deg))
     # Plot the benchmark data
-    for y, y_err in izip(ys, y_errors):
+    for label, y, y_err in izip(labels, ys, y_errors):
         y = np.array(y) / scale
         y_err = np.array(y_err) / scale
-        ax.errorbar(x, y, yerr=y_err, label='FUCK')
-    fontP = FontProperties()
-    fontP.set_size('small')
+        ax.errorbar(x, y, yerr=y_err, label=label)
     figure.suptitle(title)
     ax.set_xlabel("Input file")
     ax.set_ylabel(ylabel)
-    ax.legend(loc='best')
-    ax.savefig(output_fp)
+    fontP = FontProperties()
+    fontP.set_size('small')
+    ax.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
+    ax.set_xticks(x)
+    ax.set_xticklabels(x_ticks)
+    figure.savefig(output_fp)
 
 
-def make_comparison_plot(x_axis, data, title, ylabel, output_fp, scale=1):
+def make_comparison_plot(x, data, title, ylabel, output_fp, scale=1):
     """Generates a plot for performance comparison
 
     Parameters
     ----------
-    x_axis : list
+    x : list
         The values for the x axis
     data : dict
         Dict of {label : list} in which each data series to be plotted is keyed
@@ -96,14 +100,24 @@ def make_comparison_plot(x_axis, data, title, ylabel, output_fp, scale=1):
     scale : number, optional
         Value used to scale the y values (default: 1, no scale is performed)
     """
+    # Check if the x axis is numerical
+    x_ticks = x
+    try:
+        x = np.asarray(x, dtype=np.float64)
+    except ValueError:
+        x = np.arange(len(x))
     figure = plt.figure()
     ax = figure.add_subplot(111)
     for label, values in data.iteritems():
         y = np.array(values[0]) / scale
         y_err = np.array(values[1]) / scale
-        ax.errorbar(x_axis, y, yerr=y_err, label=label)
+        ax.errorbar(x, y, yerr=y_err, label=label)
     figure.suptitle(title)
     ax.set_xlabel('Input file')
     ax.set_ylabel(ylabel)
-    ax.legend(loc='best')
-    ax.savefig(output_fp)
+    fontP = FontProperties()
+    fontP.set_size('small')
+    ax.legend(loc='best', prop=fontP, fancybox=True).get_frame().set_alpha(0.2)
+    ax.set_xticks(x)
+    ax.set_xticklabels(x_ticks)
+    figure.savefig(output_fp)

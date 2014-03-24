@@ -9,9 +9,6 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
-from os import listdir
-from os.path import join, isdir
-
 from collections import namedtuple
 from itertools import izip
 import numpy as np
@@ -80,36 +77,41 @@ def process_benchmark_results(case_results):
     SummarizedResults
         namedtuple with the benchmark suite results
     """
-    BenchData = namedtuple('BenchData', ('label', 'wall', 'user', 'kernel',
-                                         'mem'))
+    BenchData = namedtuple('BenchData', ('wall', 'user', 'kernel', 'mem'))
     # Get all the benchmark data in a single structure
     # with mean and standard deviation values
-    result_means = BenchData([], [], [], [], [])
-    result_stdev = BenchData([], [], [], [], [])
+    labels = []
+    result_means = BenchData([], [], [], [])
+    result_stdev = BenchData([], [], [], [])
     for case in case_results:
-        result_means.label.append(case.label)
+        labels.append(case.label)
+
         result_means.wall.append(np.mean(case.wall))
         result_means.user.append(np.mean(case.user))
         result_means.kernel.append(np.mean(case.kernel))
         result_means.mem.append(np.mean(case.mem))
 
-        result_stdev.label.append(case.label)
         result_stdev.wall.append(np.std(case.wall))
         result_stdev.user.append(np.std(case.user))
         result_stdev.kernel.append(np.std(case.kernel))
         result_stdev.mem.append(np.std(case.mem))
 
     FittedCurve = namedtuple('FittedCurve', ('poly', 'deg'))
+    # Check if the labels is numerical
+    try:
+        x = np.asarray(labels, dtype=np.float64)
+    except ValueError:
+        x = np.arange(len(labels))
     # Get the polynomial that fits the wall time
-    wall_poly, wall_deg = curve_fitting(result_means.label, result_means.wall)
+    wall_poly, wall_deg = curve_fitting(x, result_means.wall)
     wall_curve = FittedCurve(wall_poly, wall_deg)
     # Get the polynomial that fits the memory usage
-    mem_poly, mem_deg = curve_fitting(result_means.label, result_means.mem)
+    mem_poly, mem_deg = curve_fitting(x, result_means.mem)
     mem_curve = FittedCurve(mem_poly, mem_deg)
 
-    SummarizedResults = namedtuple('SummarizedResults', ('means', 'stdevs',
-                                   'wall_curve', 'mem_curve'))
-    result = SummarizedResults(result_means, result_stdev, wall_curve,
+    SummarizedResults = namedtuple('SummarizedResults', ('labels', 'means',
+                                   'stdevs', 'wall_curve', 'mem_curve'))
+    result = SummarizedResults(labels, result_means, result_stdev, wall_curve,
                                mem_curve)
     return result
 
@@ -124,15 +126,12 @@ def compare_benchmark_results(results, labels):
     labels : Iterable
         The label for each data series
     """
-    comp_data = {None, {}, {}}
+    comp_data = CompData(results[0].label, {}, {})
     for label, res in izip(labels, results):
-        if not comp_data.x:
-            comp_data.x = res.label
-        else:
-            if set(comp_data.x) != set(res.label):
-                raise ValueError("In order to compare different benchmark "
-                                 "results, they should be over the same set of"
-                                 " test cases")
+        if set(comp_data.x) != set(res.label):
+            raise ValueError("In order to compare different benchmark "
+                             "results, they should be over the same set of"
+                             " test cases: %s != %s" % (comp_data.x, label))
         comp_data.time[label] = (res.wall_mean, res.wall_stdev)
         comp_data.mem[label] = (res.mem_mean, res.mem_stdev)
     return comp_data

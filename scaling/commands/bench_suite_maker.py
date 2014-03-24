@@ -29,14 +29,14 @@ class BenchSuiteMaker(Command):
                   Description='dictionary where the keys are the parameters '
                   'to test and the values are a list of values for such '
                   'parameter.',
-                  DefaultDescription='No parameters used', Default=None),
+                  DefaultDescription='No parameters used'),
         CommandIn(Name='bench_files', DataType=list,
                   Description='List of lists of paths to the benchmark files '
                   'to use as input for the command. Each inner list is a test '
                   'case and should have the same length as the in_opts '
                   'parameter.',
                   DefaultDescription='No bench_files used',
-                  Required=False, Default=None),
+                  Required=False),
         CommandIn(Name='in_opts', DataType=list,
                   Description='list of options used for providing the '
                   'benchmark files to the command. It should have the same '

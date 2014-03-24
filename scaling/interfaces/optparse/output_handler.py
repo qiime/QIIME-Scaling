@@ -59,46 +59,46 @@ def write_bench_results(result_key, data, option_value=None):
                         "user_std", "kernel_mean", "kernel_std",
                         "mem_mean", "mem_std"])]
     # Loop over all the tests cases
-    for mean, stdev in izip(data.means, data.stdevs):
-        lines.append("\t".join([mean.label,
-                                mean.wall,
-                                stdev.wall,
-                                mean.user,
-                                stdev.user,
-                                mean.kernel,
-                                stdev.kernel,
-                                mean.mem,
-                                stdev.mem]))
+    for i, label in enumerate(data.labels):
+        lines.append("\t".join([label,
+                                str(data.means.wall[i]),
+                                str(data.stdevs.wall[i]),
+                                str(data.means.user[i]),
+                                str(data.stdevs.user[i]),
+                                str(data.means.kernel[i]),
+                                str(data.stdevs.kernel[i]),
+                                str(data.means.mem[i]),
+                                str(data.stdevs.mem[i])
+                                ]))
     write_list_of_strings(result_key, lines, option_value=summary_fp)
 
     # Write the polynomials that fit the wall time and memory usage in
     # human-readable form
     poly_fp = join(option_value, "curves.txt")
-    lines = [generate_poly_label(data.wall_curve.poly, data.wall_curve.deg),
+    lines = ["Wall time fitted curve",
+             generate_poly_label(data.wall_curve.poly, data.wall_curve.deg),
+             "Memory usage fitted curve",
              generate_poly_label(data.mem_curve.poly, data.mem_curve.deg)]
     write_list_of_strings(result_key, lines, option_value=poly_fp)
 
     # Create plots with benchmark results
-    x = [mean.label for mean in means]
     # Create a plot with the time results
     time_plot_fp = join(option_value, "time_fig.png")
-    ys = [[mean.wall for mean in data.means],
-          [mean.user for mean in data.means],
-          [mean.kernel for mean in data.means]]
-    y_errors = [[stdev.wall for stdev in mean.stdevs],
-                [stdev.user for stdev in mean.stdevs],
-                [stdev.kernel for stdev in mean.stdevs]]
-
-    make_bench_plot(x, ys, y_errors, "Running time", "Time (seconds)",
-                    data.wall_curve.poly, data.wall_curve.deg, time_plot_fp)
+    ys = [data.means.wall, data.means.user, data.means.kernel]
+    y_errors = [data.stdevs.wall, data.stdevs.user, data.stdevs.kernel]
+    labels = ['wall', 'user', 'kernel']
+    make_bench_plot(data.labels, ys, y_errors, labels, "Running time",
+                    "Time (seconds)", data.wall_curve.poly,
+                    data.wall_curve.deg, time_plot_fp)
 
     # Create a plot with the memory results
     mem_plot_fp = join(option_value, "mem_fig.png")
-    yx = [[mean.mem for mean in data.means]]
-    y_errors = [[stdev.mem for stdev in data.stdevs]]
-    make_bench_plot(x, ys, y_errors, "Memory usage", "Memory (MB)",
-                    data.mem_curve.poly, data.mem_curve.deg, mem_plot_fp,
-                    scale=1024)
+    yx = [data.means.mem]
+    y_errors = [data.stdevs.mem]
+    labels = ['memory']
+    make_bench_plot(data.labels, ys, y_errors, labels, "Memory usage",
+                    "Memory (GB)", data.mem_curve.poly, data.mem_curve.deg,
+                    mem_plot_fp, scale=1024*1024)
 
 
 def write_comparison_results(result_key, data, option_value=None):
@@ -137,5 +137,5 @@ def write_comparison_results(result_key, data, option_value=None):
     make_comparison_plot(data.x, data.time, "Running time", "Time (seconds)",
                          time_plot_fp)
     mem_plot_fp = join(option_value, "mem_fig.png")
-    make_comparison_plot(data.x, data.mem, "Memory usage", "Memory (MB)",
-                         mem_plot_fp, scale=1024)
+    make_comparison_plot(data.x, data.mem, "Memory usage", "Memory (GB)",
+                         mem_plot_fp, scale=1024*1024)

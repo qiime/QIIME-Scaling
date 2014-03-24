@@ -43,7 +43,7 @@ class BenchResultsComparator(Command):
     def run(self, **kwargs):
         result = {}
 
-        bench_results = kwargs['bench_results']
+        bench_results = list(kwargs['bench_results'])
         labels = kwargs['labels']
 
         if len(bench_results) < 2:
