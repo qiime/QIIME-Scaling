@@ -9,13 +9,11 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
-from collections import namedtuple
 from itertools import izip
 import numpy as np
 
-from scaling.util import natural_sort
-
-CompData = namedtuple('CompData', ('x', 'time', 'mem'))
+from scaling.util import (natural_sort, SummarizedResults, BenchData,
+                          FittedCurve, CompData)
 
 
 def compute_rsquare(y, SSerr):
@@ -77,7 +75,6 @@ def process_benchmark_results(case_results):
     SummarizedResults
         namedtuple with the benchmark suite results
     """
-    BenchData = namedtuple('BenchData', ('wall', 'user', 'kernel', 'mem'))
     # Get all the benchmark data in a single structure
     # with mean and standard deviation values
     labels = []
@@ -96,7 +93,6 @@ def process_benchmark_results(case_results):
         result_stdev.kernel.append(np.std(case.kernel))
         result_stdev.mem.append(np.std(case.mem))
 
-    FittedCurve = namedtuple('FittedCurve', ('poly', 'deg'))
     # Check if the labels is numerical
     try:
         x = np.asarray(labels, dtype=np.float64)
@@ -109,8 +105,6 @@ def process_benchmark_results(case_results):
     mem_poly, mem_deg = curve_fitting(x, result_means.mem)
     mem_curve = FittedCurve(mem_poly, mem_deg)
 
-    SummarizedResults = namedtuple('SummarizedResults', ('labels', 'means',
-                                   'stdevs', 'wall_curve', 'mem_curve'))
     result = SummarizedResults(labels, result_means, result_stdev, wall_curve,
                                mem_curve)
     return result

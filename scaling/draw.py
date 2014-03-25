@@ -89,8 +89,8 @@ def make_comparison_plot(x, data, title, ylabel, output_fp, scale=1):
     x : list
         The values for the x axis
     data : dict
-        Dict of {label : list} in which each data series to be plotted is keyed
-        by its label
+        Dict of {label : tuple(list means, list stdevs)} in which each data
+        series to be plotted is keyed by its label
     title : string
         Plot title
     ylabel : string

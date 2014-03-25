@@ -101,7 +101,7 @@ def write_bench_results(result_key, data, option_value=None):
                     mem_plot_fp, scale=1024*1024)
 
 
-def write_comparison_results(result_key, data, option_value=None):
+def write_comp_results(result_key, data, option_value=None):
     """Output handler for the bench_results_processer command
 
     Parameters

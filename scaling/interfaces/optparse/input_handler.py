@@ -15,7 +15,7 @@ from collections import namedtuple
 from warnings import warn
 
 from scaling.parse import parse_parameters_file, parse_summarized_results
-from scaling.util import natural_sort
+from scaling.util import natural_sort, BenchCase
 
 
 def load_parameters(param_fp):
@@ -125,9 +125,6 @@ def parse_timing_directory(timing_dir):
         If there is some file in the first level of the input directory
         structure
     """
-    BenchCase = namedtuple('BenchCase', ('label', 'wall', 'user',
-                                         'kernel', 'mem'))
-
     # listdir returns the contents in an arbitrary order - sort them
     dirlist = listdir(timing_dir)
     dirlist = natural_sort(dirlist)

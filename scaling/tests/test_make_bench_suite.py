@@ -10,6 +10,7 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 from unittest import TestCase, main
+
 from scaling.make_bench_suite import (get_command_string,
                                       make_bench_suite_files,
                                       make_bench_suite_parameters)

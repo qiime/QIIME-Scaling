@@ -12,6 +12,15 @@ __status__ = "Development"
 import sys
 from StringIO import StringIO
 from re import split
+from collections import namedtuple
+
+BenchCase = namedtuple('BenchCase', ('label', 'wall', 'user', 'kernel', 'mem'))
+SummarizedResults = namedtuple('SummarizedResults', ('labels', 'means',
+                                                     'stdevs', 'wall_curve',
+                                                     'mem_curve'))
+BenchData = namedtuple('BenchData', ('wall', 'user', 'kernel', 'mem'))
+FittedCurve = namedtuple('FittedCurve', ('poly', 'deg'))
+CompData = namedtuple('CompData', ('x', 'time', 'mem'))
 
 
 class OutputRedirect:
@@ -47,10 +56,6 @@ def generate_poly_label(poly, deg):
         poly: numpy array of float
         deg: float
     """
-    s = []
-    for i in range(deg):
-        s.append("%s*x^%s + " % (poly[i], deg-i))
-        # s += str(poly[i]) + "*x^" + str(deg-i) + " + "
+    s = ["%s*x^%s + " % (poly[i], deg-i) for i in range(deg)]
     s.append(str(poly[deg]))
-    # s += str(poly[deg])
     return "".join(s)

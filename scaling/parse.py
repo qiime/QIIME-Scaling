@@ -12,6 +12,13 @@ __status__ = "Development"
 from collections import namedtuple
 
 
+BenchSummary = namedtuple('BenchSummary', ('label', 'wall_mean',
+                                           'wall_stdev', 'user_mean',
+                                           'user_stdev', 'kernel_mean',
+                                           'kernel_stdev', 'mem_mean',
+                                           'mem_stdev'))
+
+
 def parse_parameters_file(lines):
     """Parses the parameters file encoded in lines and returns it as a dict
 
@@ -41,11 +48,6 @@ def parse_summarized_results(lines):
     lines : iterable
         The contents of the summarize results file
     """
-    BenchSummary = namedtuple('BenchSummary', ('label', 'wall_mean',
-                                               'wall_stdev', 'user_mean',
-                                               'user_stdev', 'kernel_mean',
-                                               'kernel_stdev', 'mem_mean',
-                                               'mem_stdev'))
     result = BenchSummary([], [], [], [], [], [], [], [], [])
     # Begin iterating over lines
     for line in lines:
