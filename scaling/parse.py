@@ -9,27 +9,26 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
-from collections import namedtuple
-
-
-BenchSummary = namedtuple('BenchSummary', ('label', 'wall_mean',
-                                           'wall_stdev', 'user_mean',
-                                           'user_stdev', 'kernel_mean',
-                                           'kernel_stdev', 'mem_mean',
-                                           'mem_stdev'))
+from scaling.util import BenchSummary
 
 
 def parse_parameters_file(lines):
     """Parses the parameters file encoded in lines and returns it as a dict
 
-    Inputs:
-        lines: open file object
-
     The format of the parameter file is:
-        param_name <tab> value1,value2,...
+        param_name_1 <tab> value1,value2,...
+        param_name_2 <tab> value1,value2,...
 
-    The output dictionary is keyed by parameter name and values are lists with
-        the parameter values to test
+    Parameters
+    ----------
+    lines: iterable
+        The contents of the parameters file
+
+    Returns
+    -------
+    dict of {string: list}
+        Keys are the name of the parameters and list the values for such
+        parameter
     """
     param_dict = {}
     for line in lines:

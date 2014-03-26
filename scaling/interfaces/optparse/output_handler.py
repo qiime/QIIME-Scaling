@@ -10,9 +10,7 @@ __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
 import os
-import numpy as np
 from os.path import join
-from itertools import izip
 
 from pyqi.core.exception import IncompetentDeveloperError
 from pyqi.core.interfaces.optparse.output_handler import write_list_of_strings
@@ -93,7 +91,6 @@ def write_bench_results(result_key, data, option_value=None):
 
     # Create a plot with the memory results
     mem_plot_fp = join(option_value, "mem_fig.png")
-    yx = [data.means.mem]
     y_errors = [data.stdevs.mem]
     labels = ['memory']
     make_bench_plot(data.labels, ys, y_errors, labels, "Memory usage",

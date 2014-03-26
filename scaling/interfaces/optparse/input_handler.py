@@ -11,7 +11,6 @@ __status__ = "Development"
 
 from os import listdir
 from os.path import abspath, join, isdir
-from collections import namedtuple
 from warnings import warn
 
 from scaling.parse import parse_parameters_file, parse_summarized_results
@@ -140,7 +139,7 @@ def parse_timing_directory(timing_dir):
         case = BenchCase(dirname, [], [], [], [])
         # Loop over the timing files in the current directory
         filelist = listdir(dirpath)
-        filelist = sorted(filelist)
+        filelist = natural_sort(filelist)
         for filename in filelist:
             # Get the path to the current timing file
             filepath = join(dirpath, filename)

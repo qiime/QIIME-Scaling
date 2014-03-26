@@ -10,8 +10,8 @@ __email__ = "josenavasmolina@gmail.com"
 
 from unittest import TestCase, main
 
-from scaling.parse import (parse_parameters_file, parse_summarized_results,
-                           BenchSummary)
+from scaling.util import BenchSummary
+from scaling.parse import parse_parameters_file, parse_summarized_results
 
 
 class ParseTests(TestCase):

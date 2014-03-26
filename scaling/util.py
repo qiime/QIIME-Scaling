@@ -21,20 +21,11 @@ SummarizedResults = namedtuple('SummarizedResults', ('labels', 'means',
 BenchData = namedtuple('BenchData', ('wall', 'user', 'kernel', 'mem'))
 FittedCurve = namedtuple('FittedCurve', ('poly', 'deg'))
 CompData = namedtuple('CompData', ('x', 'time', 'mem'))
-
-
-class OutputRedirect:
-    """Class to redirect the std output to StringIO using a `with` statement"""
-    saved_stdout = None
-
-    def __enter__(self):
-        self.saved_stdout = sys.stdout
-        out = StringIO()
-        sys.stdout = out
-        return out
-
-    def __exit__(self, type, value, tb):
-        sys.stdout = self.saved_stdout
+BenchSummary = namedtuple('BenchSummary', ('label', 'wall_mean',
+                                           'wall_stdev', 'user_mean',
+                                           'user_stdev', 'kernel_mean',
+                                           'kernel_stdev', 'mem_mean',
+                                           'mem_stdev'))
 
 
 def natural_sort(l):

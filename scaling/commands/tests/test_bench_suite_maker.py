@@ -111,25 +111,25 @@ class BenchSuiteMakerTests(TestCase):
         """Correctly handles invalid input by raising a CommandError."""
         # Too many options
         with self.assertRaises(CommandError):
-            _ = self.cmd(command=self.command,
-                         parameters=self.param_single,
-                         bench_files=self.bench_files_single)
+            self.cmd(command=self.command,
+                     parameters=self.param_single,
+                     bench_files=self.bench_files_single)
 
         # Multiple bench files are provided, but only a single in_opt
         with self.assertRaises(CommandError):
-            _ = self.cmd(command=self.command,
-                         bench_files=self.bench_files_mult)
+            self.cmd(command=self.command,
+                     bench_files=self.bench_files_mult)
 
         with self.assertRaises(CommandError):
-            _ = self.cmd(command=self.command,
-                         bench_files=self.bench_files_mult,
-                         in_opts=self.in_opts_single)
+            self.cmd(command=self.command,
+                     bench_files=self.bench_files_mult,
+                     in_opts=self.in_opts_single)
 
         # Single bench files are provided, but multiple in_opts
         with self.assertRaises(CommandError):
-            _ = self.cmd(command=self.command,
-                         bench_files=self.bench_files_single,
-                         in_opts=self.in_opts_mult)
+            self.cmd(command=self.command,
+                     bench_files=self.bench_files_single,
+                     in_opts=self.in_opts_mult)
 
 single_file_suite = """#!/bin/bash
 

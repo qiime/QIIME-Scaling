@@ -12,8 +12,7 @@ __status__ = "Development"
 from itertools import izip
 import numpy as np
 
-from scaling.util import (natural_sort, SummarizedResults, BenchData,
-                          FittedCurve, CompData)
+from scaling.util import SummarizedResults, BenchData, FittedCurve, CompData
 
 
 def compute_rsquare(y, SSerr):
