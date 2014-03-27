@@ -46,7 +46,14 @@ def make_bench_plot(x, ys, y_errors, labels, title, ylabel, poly, deg,
         The path to the output figure
     scale : number, optional
         Value used to scale the y values (default: 1, no scale is performed)
+
+    Raises
+    ------
+    ValueError
+        If scale is <= 0
     """
+    if scale <= 0:
+        raise ValueError("Scale should be an integer greater than 0")
     # Check if the x axis is numerical
     x_ticks = x
     try:
@@ -99,7 +106,14 @@ def make_comparison_plot(x, data, title, ylabel, output_fp, scale=1):
         The path to the output figure
     scale : number, optional
         Value used to scale the y values (default: 1, no scale is performed)
+
+    Raises
+    ------
+    ValueError
+        If scale is <= 0
     """
+    if scale <= 0:
+        raise ValueError("Scale should be an integer greater than 0")
     # Check if the x axis is numerical
     x_ticks = x
     try:
