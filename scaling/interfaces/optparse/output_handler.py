@@ -9,95 +9,130 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
+from os import mkdir
+from os.path import join, exists, isfile
+
 from pyqi.core.exception import IncompetentDeveloperError
-from pyqi.core.interfaces.optparse.output_handler import \
-    write_list_of_strings, write_string
-import os
-import numpy as np
+from pyqi.core.interfaces.optparse.output_handler import write_list_of_strings
+
+from scaling.util import generate_poly_label
+from scaling.draw import make_bench_plot, make_comparison_plot
 
 
-def write_summarized_results(result_key, data, option_value=None):
-    """Write the benchmark results in a tab-delimited format
+def write_bench_results(result_key, data, option_value=None):
+    """Output handler for the bench_results_processer command
 
-    option_value is the base output directory
+    Parameters
+    ----------
+    result_key : string
+        The key used in the results dictionary
+    data : BenchData namedtuple
+        The results of the command
+    option_value : string
+        Path to the output directory
 
-    Writes a file with the benchmark results in a tab-delimited form,
-    with the following headers: label, wall_mean, wall_std, user_mean,
-    user_std, kernel_mean, kernel_std, mem_mean, mem_std
-    Each row contains the results for a single experiment
+    Raises
+    ------
+    IOError
+        If the output directory exists and it's a file
     """
-
+    # Check that we are not dealing with incompetent developers
     if option_value is None:
         raise IncompetentDeveloperError("Cannot write output without an "
                                         "output directory.")
 
-    if os.path.exists(option_value):
-        if os.path.isfile(option_value):
+    # Check that the output directory exists
+    if exists(option_value):
+        # Check that it is not a file, so we can use it
+        if isfile(option_value):
             raise IOError("Output directory '%s' already exists and it is a "
                           "file." % option_value)
     else:
-        os.mkdir(option_value)
+        # The output directory does not exists, create it
+        mkdir(option_value)
 
-    output_fp = os.path.join(option_value, "%s.txt" % result_key)
+    # Write a tab delimited file with a summary of the benchmark results
+    summary_fp = join(option_value, "summarized_results.txt")
+    lines = ["\t".join(["#label", "wall_mean", "wall_std", "user_mean",
+                        "user_std", "kernel_mean", "kernel_std",
+                        "mem_mean", "mem_std"])]
+    # Loop over all the tests cases
+    for i, label in enumerate(data.labels):
+        lines.append("\t".join([label,
+                                str(data.means.wall[i]),
+                                str(data.stdevs.wall[i]),
+                                str(data.means.user[i]),
+                                str(data.stdevs.user[i]),
+                                str(data.means.kernel[i]),
+                                str(data.stdevs.kernel[i]),
+                                str(data.means.mem[i]),
+                                str(data.stdevs.mem[i])
+                                ]))
+    write_list_of_strings(result_key, lines, option_value=summary_fp)
 
-    lines = []
-    headers = ["#label", "wall_mean", "wall_std", "user_mean", "user_std",
-               "kernel_mean", "kernel_std", "mem_mean", "mem_std"]
-    lines.append("\t".join(headers))
-    # Loop over all the experiments
-    for i, label in enumerate(data['label']):
-        values = [str(label)]
-        values.append(str(data['wall_time'][0][i]))
-        values.append(str(data['wall_time'][1][i]))
-        values.append(str(data['cpu_user'][0][i]))
-        values.append(str(data['cpu_user'][1][i]))
-        values.append(str(data['cpu_kernel'][0][i]))
-        values.append(str(data['cpu_kernel'][1][i]))
-        values.append(str(data['memory'][0][i]))
-        values.append(str(data['memory'][1][i]))
-        lines.append("\t".join(values))
+    # Write the polynomials that fit the wall time and memory usage in
+    # human-readable form
+    poly_fp = join(option_value, "curves.txt")
+    lines = ["Wall time fitted curve",
+             generate_poly_label(data.wall_curve.poly, data.wall_curve.deg),
+             "Memory usage fitted curve",
+             generate_poly_label(data.mem_curve.poly, data.mem_curve.deg)]
+    write_list_of_strings(result_key, lines, option_value=poly_fp)
 
-    write_list_of_strings(result_key, lines, option_value=output_fp)
+    # Create plots with benchmark results
+    # Create a plot with the time results
+    time_plot_fp = join(option_value, "time_fig.png")
+    ys = [data.means.wall, data.means.user, data.means.kernel]
+    y_errors = [data.stdevs.wall, data.stdevs.user, data.stdevs.kernel]
+    labels = ['wall', 'user', 'kernel']
+    make_bench_plot(data.labels, ys, y_errors, labels, "Running time",
+                    "Time (seconds)", data.wall_curve.poly,
+                    data.wall_curve.deg, time_plot_fp)
+
+    # Create a plot with the memory results
+    mem_plot_fp = join(option_value, "mem_fig.png")
+    y_errors = [data.stdevs.mem]
+    labels = ['memory']
+    make_bench_plot(data.labels, ys, y_errors, labels, "Memory usage",
+                    "Memory (GB)", data.mem_curve.poly, data.mem_curve.deg,
+                    mem_plot_fp, scale=1024*1024)
 
 
-def write_matplotlib_figure(result_key, data, option_value=None):
-    """Write a matplotlib figure to disk
+def write_comp_results(result_key, data, option_value=None):
+    """Output handler for the bench_results_processer command
 
-    option_value is the base output directory
+    Parameters
+    ----------
+    result_key : string
+        The key used in the results dictionary
+    data : CompData namedtuple
+        The results of the command
+    option_value : string
+        Path to the output directory
+
+    Raises
+    ------
+    IOError
+        If the output directory exists and it's a file
     """
+    # Check that we are not dealing with incompetent developers
     if option_value is None:
         raise IncompetentDeveloperError("Cannot write output without an "
                                         "output directory.")
 
-    if os.path.exists(option_value):
-        if os.path.isfile(option_value):
+    # Check that the output directory exists
+    if exists(option_value):
+        # Check that it is not a file, so we can use it
+        if isfile(option_value):
             raise IOError("Output directory '%s' already exists and it is a "
                           "file." % option_value)
     else:
-        os.mkdir(option_value)
-
-    output_fp = os.path.join(option_value, "%s.png" % result_key)
-    if os.path.exists(output_fp):
-        raise IOError("Output path %s already exists." % output_fp)
-
-    data.savefig(output_fp)
-
-
-def write_string_to_dir(result_key, data, option_value=None):
-    """Write a string to a file
-
-    option_value is the base output directory
-    """
-    if option_value is None:
-        raise IncompetentDeveloperError("Cannot write output without an "
-                                        "output directory.")
-
-    if os.path.exists(option_value):
-        if os.path.isfile(option_value):
-            raise IOError("Output directory '%s' already exists and it is a "
-                          "file." % option_value)
-    else:
-        os.mkdir(option_value)
-
-    output_fp = os.path.join(option_value, "%s.txt" % result_key)
-    write_string(result_key, data, option_value=output_fp)
+        # The output directory does not exists, create it
+        mkdir(option_value)
+    # Create the plots with the benchmark comparison
+    time_plot_fp = join(option_value, "time_fig.png")
+    make_comparison_plot(data.x, data.time, "Running time", "Time (seconds)",
+                         time_plot_fp)
+    mem_plot_fp = join(option_value, "mem_fig.png")
+    make_comparison_plot(data.x, data.mem, "Memory usage", "Memory (GB)",
+                         mem_plot_fp, scale=1024*1024)

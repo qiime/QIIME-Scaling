@@ -4,7 +4,7 @@ __author__ = "Jose Antonio Navas Molina"
 __copyright__ = "Copyright 2014, The QIIME-Scaling Project"
 __credits__ = ["Jose Antonio Navas Molina", "Daniel McDonald"]
 __license__ = "BSD"
-__version__ = "0.0.1-dev"
+__version__ = "0.0.2-dev"
 __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
@@ -17,10 +17,14 @@ from time import sleep
 def check_status(jobs_to_monitor):
     """Check the status of the passed list of jobs
 
-    Inputs:
-        jobs_to_monitor: list of job ids
+    Parameters
+    ----------
+    jobs_to_monitor: Iterable
+        The jobs id
 
-    Returns:
+    Returns
+    -------
+    list
         A subset of jobs_to_monitor containing those jobs that are still
             running
     """
@@ -46,9 +50,12 @@ def check_status(jobs_to_monitor):
 def wait_on(jobs_to_monitor, poll_interval=5):
     """Block while jobs to monitor are running
 
-    Inputs:
-        jobs_to_monitor: list of job ids
-        poll_interval: interval between checks, in seconds
+    Parameters
+    ----------
+    jobs_to_monitor: Iterable
+        The jobs id
+    poll_interval: int
+        interval between checks, in seconds
     """
     # Get the jobs ids by up to the first '.' character
     jobs_to_monitor = [job.split('.')[0] for job in jobs_to_monitor]
