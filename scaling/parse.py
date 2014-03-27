@@ -29,13 +29,21 @@ def parse_parameters_file(lines):
     dict of {string: list}
         Keys are the name of the parameters and list the values for such
         parameter
+
+    Raises
+    ------
+    ValueError
+        If the parameters files does not have the expected format
     """
     param_dict = {}
     for line in lines:
         line = line.strip()
         if line:
-            (param, values) = line.split('\t')
-            param_dict[param] = values.split(',')
+            values = line.split('\t')
+            if len(values) > 2:
+                raise ValueError("Unrecognized parameters file format")
+            (param, param_values) = values
+            param_dict[param] = param_values.split(',')
     return param_dict
 
 
