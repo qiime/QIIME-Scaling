@@ -18,10 +18,6 @@ from scaling.util import SummarizedResults, BenchData, FittedCurve, CompData
 def compute_rsquare(y, SSerr):
     """Computes the Rsquare value using the points y and the Sum of Squares
 
-    Input:
-        y: numpy array
-        SSerr: numpy array with 1 float
-
     Computes Rsquare using the following formula:
                             SSerr
             Rsquare = 1 - ---------
@@ -31,6 +27,18 @@ def compute_rsquare(y, SSerr):
     squares about the mean, computed as:
 
             SStot = sum( (y-mean)^2 )
+
+    Parameters
+    ----------
+    y: array
+        y values
+    SSerr: array
+        An array with a single value holding the sum of squares due to error
+
+    Returns
+    -------
+    float
+        The R^2 value
     """
     mean = np.mean(y)
     SStot = np.sum((y-mean)**2)
@@ -42,12 +50,20 @@ def compute_rsquare(y, SSerr):
 def curve_fitting(x, y):
     """Fits a polynomial curve to the data points defined by the arrays x and y
 
-    Input:
-        x: numpy array of floats
-        y: numpy array of floats
+    Parameters
+    ----------
+    x: numpy array of floats
+        X values
+    y: numpy array of floats
+        Y values
 
-    Returns the polynomial curve with less degree that fits the data points
-        with an Rsquare over 0.999; and its degree.
+    Returns
+    -------
+    array
+        The polynomial curve with less degree that fits the data points
+        with an Rsquare over 0.999
+    float
+        The polynomial degree.
     """
     deg = 0
     rsquare = 0

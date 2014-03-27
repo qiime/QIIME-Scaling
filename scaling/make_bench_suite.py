@@ -76,19 +76,27 @@ GET_RESULTS = ("scaling process-bench-results -i $timing_dest/%s -o "
 def get_command_string(command, base_name, opts, values, out_opt):
     """Generates the bash string with the benchmark command
 
-    Inputs:
-        command: string with the base command to benchmark
-        base_name: string with the base name of the output file (w/o extension)
-        opts: list with the different options to provide to the command
-        values: list of values to provide to the previous options
-        out_opt: string with the option used to indicate the output path to the
-            command
-
-    Note: raises a ValueError if the number of options and the number of values
-    provided does not match
-
     The opts list and the values list are paired in the same order, i.e.
     opts[0] with values[0], opts[1] with values[1] and so on.
+
+    Parameters
+    ----------
+    command: string
+        The base command to benchmark
+    base_name: string
+        The base name of the output file (w/o extension)
+    opts: list
+        The different options to provide to the command
+    values: list
+        The values to provide to the options
+    out_opt: string
+        The option used to indicate the output path to the command
+
+    Raises
+    ------
+    ValueError
+        if the number of options and the number of values provided does not
+        match
     """
     if len(opts) != len(values):
         raise ValueError("The number of options and the number of values "
@@ -108,22 +116,27 @@ def make_bench_suite_files(command, in_opts, bench_files, out_opt, pbs=False,
                            job_prefix="bench_", queue="", pbs_extra_args=""):
     """Generates a string with the bash commands to execute the benchmark suite
 
-    Inputs:
-        command: string with the base command to execute
-        in_opts: list with the options used to provide the input files to the
-            command
-        bench_files: list of lists with the input files for each bench case
-            e.g.  [ ["option1_file1","option2_file1"],
-                    ["option1_file2","option2_file2"],
-                    ["option1_file3","option2_file3"] ]
-        out_opt: string with the option used to indicate the output path to the
-            command
-        pbs: flag to determine if the benchmark suite will run in a PBS
-            cluster environment
-        job_prefix: prefix for the job name in case of a PBS cluster
-            environment
-        queue: PBS queue to submit jobs
-        pbs_extra_args: any extra arguments needed to qsub
+    Parameters
+    ----------
+    command: string
+        The base command to execute
+    in_opts: list with the options used to provide the input files to the
+        command
+    bench_files: list of lists
+        The input files for each bench case
+        e.g.  [ ["option1_file1","option2_file1"],
+                ["option1_file2","option2_file2"],
+                ["option1_file3","option2_file3"] ]
+    out_opt: string
+        Option used to indicate the output path to the command
+    pbs: bool
+        Ture if the benchmark suite will run in a PBS cluster environment
+    job_prefix: string
+        Prefix for the job name in case of a PBS cluster environment
+    queue: string
+        PBS queue to submit jobs
+    pbs_extra_args: string
+        Any extra arguments needed to qsub
     """
     # Initialize the result string list with the bash header
     # Get the base name of the command
@@ -169,20 +182,24 @@ def make_bench_suite_parameters(command, parameters, out_opt, pbs=False,
                                 pbs_extra_args=""):
     """Generates a string with the bash commands to execute the benchmark suite
 
-    Inputs:
-        command: string with the command to execute
-        parameters: dictionary with the parameter values to test, keyed by
-            parameter
-            e.g.  { 'param1' : ["v1", "v2", "v3"],
-                    'param2' : ["val1", "val2", "val3"]}
-        out_opt: string with the option used to indicate the output path to the
-            command
-        pbs: flag to determine if the benchmark suite will run in a PBS
-            cluster environment
-        job_prefix: prefix for the job name in case of a PBS cluster
-            environment
-        queue: PBS queue to submit jobs
-        pbs_extra_args: any extra arguments needed to qsub
+    Parameters
+    ----------
+    command: string
+        The command to execute
+    parameters: dict of {string: list of strings}
+        The parameter values to test, keyed by parameter
+        e.g.  { 'param1' : ["v1", "v2", "v3"],
+                'param2' : ["val1", "val2", "val3"]}
+    out_opt: string
+        The option used to indicate the output path to the command
+    pbs: bool
+        True if the benchmark suite will run in a PBS cluster environment
+    job_prefix: string
+        Prefix for the job name in case of a PBS cluster environment
+    queue: string
+        PBS queue to submit jobs
+    pbs_extra_args: string
+        Any extra arguments needed to qsub
     """
     # Initialize the result string list with the bash header
     # Get the base name of the command
