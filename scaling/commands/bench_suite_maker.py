@@ -18,6 +18,7 @@ from scaling.make_bench_suite import (make_bench_suite_files,
 
 
 class BenchSuiteMaker(Command):
+    """Subclassing the pyqi.core.command.Command class"""
     BriefDescription = "Generates a benchmark suite file"
     LongDescription = ("Given a command and a list of benchmarks files or a "
                        "dictionary with the options to test, generates a shell"
@@ -73,8 +74,6 @@ class BenchSuiteMaker(Command):
                    Description='String with the benchmark suite')])
 
     def run(self, **kwargs):
-        result = {}
-
         # Get command parameters
         command = kwargs['command']
         out_opt = kwargs['out_opt']
@@ -110,8 +109,6 @@ class BenchSuiteMaker(Command):
             # Not enough parameters!
             raise CommandError("Must specify parameters or bench_files.")
 
-        result['bench_suite'] = bench_str
-
-        return result
+        return {'bench_suite': bench_str}
 
 CommandConstructor = BenchSuiteMaker

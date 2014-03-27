@@ -18,6 +18,7 @@ from scaling.process_results import compare_benchmark_results
 
 
 class BenchResultsComparator(Command):
+    """Subclassing the pyqi.core.command.Command class"""
     BriefDescription = "Compare different run results of the same bench suite"
     LongDescription = ("Takes the benchmark results of different runs of the "
                        "same benchmark suite and generates a plot with the "
@@ -41,8 +42,6 @@ class BenchResultsComparator(Command):
     ])
 
     def run(self, **kwargs):
-        result = {}
-
         bench_results = list(kwargs['bench_results'])
         labels = kwargs['labels']
 
@@ -56,8 +55,6 @@ class BenchResultsComparator(Command):
 
         data = compare_benchmark_results(bench_results, labels)
 
-        result['comp_data'] = data
-
-        return result
+        return {'comp_data': data}
 
 CommandConstructor = BenchResultsComparator

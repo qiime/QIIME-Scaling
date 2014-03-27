@@ -18,6 +18,7 @@ from scaling.cluster_util import wait_on
 
 
 class BenchResultsProcesser(Command):
+    """Subclassing the pyqi.core.command.Command class"""
     BriefDescription = "Processes the benchmark suite results"
     LongDescription = ("Takes the benchmark suite output directory and "
                        "processes the benchmark measurements, creating plots "
@@ -37,8 +38,6 @@ class BenchResultsProcesser(Command):
     ])
 
     def run(self, **kwargs):
-        result = {}
-
         bench_results = kwargs['bench_results']
         job_ids = kwargs['job_ids']
 
@@ -47,8 +46,6 @@ class BenchResultsProcesser(Command):
 
         data = process_benchmark_results(bench_results)
 
-        result['bench_data'] = data
-
-        return result
+        return {'bench_data': data}
 
 CommandConstructor = BenchResultsProcesser
