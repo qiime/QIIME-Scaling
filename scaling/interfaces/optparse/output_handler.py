@@ -9,8 +9,8 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 __status__ = "Development"
 
-import os
-from os.path import join
+from os import mkdir
+from os.path import join, exists, isfile
 
 from pyqi.core.exception import IncompetentDeveloperError
 from pyqi.core.interfaces.optparse.output_handler import write_list_of_strings
@@ -42,14 +42,14 @@ def write_bench_results(result_key, data, option_value=None):
                                         "output directory.")
 
     # Check that the output directory exists
-    if os.path.exists(option_value):
+    if exists(option_value):
         # Check that it is not a file, so we can use it
-        if os.path.isfile(option_value):
+        if isfile(option_value):
             raise IOError("Output directory '%s' already exists and it is a "
                           "file." % option_value)
     else:
         # The output directory does not exists, create it
-        os.mkdir(option_value)
+        mkdir(option_value)
 
     # Write a tab delimited file with a summary of the benchmark results
     summary_fp = join(option_value, "summarized_results.txt")
@@ -121,14 +121,14 @@ def write_comp_results(result_key, data, option_value=None):
                                         "output directory.")
 
     # Check that the output directory exists
-    if os.path.exists(option_value):
+    if exists(option_value):
         # Check that it is not a file, so we can use it
-        if os.path.isfile(option_value):
+        if isfile(option_value):
             raise IOError("Output directory '%s' already exists and it is a "
                           "file." % option_value)
     else:
         # The output directory does not exists, create it
-        os.mkdir(option_value)
+        mkdir(option_value)
     # Create the plots with the benchmark comparison
     time_plot_fp = join(option_value, "time_fig.png")
     make_comparison_plot(data.x, data.time, "Running time", "Time (seconds)",
