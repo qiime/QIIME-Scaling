@@ -9,45 +9,69 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 
 from unittest import TestCase, main
-from os.path import dirname, join, abspath
 
 from pyqi.core.exception import CommandError
 
+from scaling.util import BenchSummary, CompData
 from scaling.commands.bench_results_comparator import BenchResultsComparator
-from scaling.util import OutputRedirect
 
 
 class BenchResultsComparatorTests(TestCase):
     def setUp(self):
         """Set up data for use in unit tests"""
         self.cmd = BenchResultsComparator()
-        self.exp_keys = ['time_fig', 'mem_fig']
         # Get the folder with the tests files
-        tests_dir = dirname(abspath(__file__))
-        self.timing_dir = join(tests_dir, '../support_files/timing')
-        self.timing_dir_2 = join(tests_dir, '../support_files/timing_2')
-        self.labels = ['foo', 'bar']
+        self.results = [BenchSummary(['10', '20', '30'],
+                                     [102.4, 154.8, 209.282],
+                                     [1.8547237, 4.57820926, 2.76194424],
+                                     [98.2, 147.692, 200.594],
+                                     [0.55497748, 3.00350728, 2.87348986],
+                                     [1.596, 6.534, 6.7546],
+                                     [0.11943199, 0.5011826, 1.13082653],
+                                     [2528.4, 5153.2, 10537.2],
+                                     [5.23832034, 35.65052594, 68.93591227]),
+                        BenchSummary(['10', '20', '30'],
+                                     [102.4, 154.8, 209.282],
+                                     [1.8547237, 4.57820926, 2.76194424],
+                                     [98.2, 147.692, 200.594],
+                                     [0.55497748, 3.00350728, 2.87348986],
+                                     [1.596, 6.534, 6.7546],
+                                     [0.11943199, 0.5011826, 1.13082653],
+                                     [2528.4, 5153.2, 10537.2],
+                                     [5.23832034, 35.65052594, 68.93591227])]
+        self.labels = ['data_1', 'data_2']
 
     def test_bench_results_comparator(self):
-        """Correctly generates the output figures"""
-        stdout_red = OutputRedirect()
-        with stdout_red as out:
-            obs = self.cmd(input_dirs=[self.timing_dir, self.timing_dir_2],
-                           labels=self.labels)
-            obs_out = out.getvalue()
-        self.assertEqual(obs.keys(), self.exp_keys)
-        self.assertEqual(obs['time_fig'].__class__, Figure)
-        self.assertEqual(obs['mem_fig'].__class__, Figure)
-        out_exp = ("Warning - File %s/20/5.txt not used:\nWarning - File "
-                   "%s/20/5.txt not used:\n" % (self.timing_dir,
-                                                self.timing_dir_2))
-        self.assertEqual(obs_out, out_exp)
+        """Correctly generates the output structure"""
+        obs = self.cmd(bench_results=self.results, labels=self.labels)
+        exp = {'comp_data': CompData(['10', '20', '30'],
+                                     {'data_1': ([102.4, 154.8, 209.282],
+                                                 [1.8547237, 4.57820926,
+                                                  2.76194424]),
+                                      'data_2': ([102.4, 154.8, 209.282],
+                                                 [1.8547237, 4.57820926,
+                                                  2.76194424])},
+                                     {'data_1': ([2528.4, 5153.2, 10537.2],
+                                                 [5.23832034,
+                                                  35.65052594,
+                                                  68.93591227]),
+                                      'data_2': ([2528.4, 5153.2, 10537.2],
+                                                 [5.23832034,
+                                                  35.65052594,
+                                                  68.93591227])})}
+        self.assertEqual(obs, exp)
 
-    def test_invalid_input(self):
-        """Correctly handles invalid input by rising a CommandError"""
-        # Too few paths
+    def test_invalid_bench_results(self):
+        """Raises a CommandError if len(bench_results) < 2"""
         with self.assertRaises(CommandError):
-            _ = self.cmd(input_dirs=['/foo/bar'], labels=self.labels)
+            self.cmd(bench_results=[self.results[0]], labels=[self.labels[0]])
+
+    def test_inconsistent_inputs(self):
+        """Raises a CommandError if len(bench_results) != len(labels)"""
+        with self.assertRaises(CommandError):
+            self.cmd(bench_results=self.results, labels=['data_1', 'data_2',
+                                                         'data_extra'])
+
 
 if __name__ == '__main__':
     main()

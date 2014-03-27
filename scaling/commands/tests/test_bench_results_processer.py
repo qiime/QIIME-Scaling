@@ -9,59 +9,60 @@ __maintainer__ = "Jose Antonio Navas Molina"
 __email__ = "josenavasmolina@gmail.com"
 
 from unittest import TestCase, main
+
+import numpy as np
+from numpy.testing import assert_almost_equal
+
+from scaling.util import BenchCase, BenchData, FittedCurve, SummarizedResults
 from scaling.commands.bench_results_processer import BenchResultsProcesser
-from scaling.util import OutputRedirect
-from matplotlib.figure import Figure
-import os
+
 
 class BenchResultsProcesserTests(TestCase):
     def setUp(self):
         """Set up data for use in unit tests"""
         self.cmd = BenchResultsProcesser()
-        self.exp_keys = ['bench_data', 'time_fig', 'time_str',
-                         'mem_fig', 'mem_str']
-        # Get the tests folder
-        tests_dir = os.path.dirname(os.path.abspath(__file__))
-        # Path to the test timing folder
-        self.timing_dir = os.path.join(tests_dir, '../support_files/timing')
+        self.results = [BenchCase('file_10',
+                                  [100, 101, 105, 104, 102],
+                                  [98, 98.4, 97.3, 98.3, 99],
+                                  [1.7, 1.5, 1.6, 1.75, 1.43],
+                                  [2530, 2534, 2533, 2520, 2525]),
+                        BenchCase('file_20',
+                                  [151, 162, 149, 155, 157],
+                                  [143, 148, 145.86, 150.4, 151.2],
+                                  [6.5, 7.2, 5.87, 6.12, 6.98],
+                                  [5143, 5200, 5098, 5142, 5183]),
+                        BenchCase('file_30',
+                                  [210, 205.1, 207.21, 211.54, 212.56],
+                                  [200.12, 198.52, 202.14, 205.21, 196.98],
+                                  [8.54, 6.83, 5.12, 6.14, 7.143],
+                                  [10541, 10621, 10421, 10514, 10589])]
 
     def test_bench_results_processer(self):
-        """Data correctly retrieved"""
-        stdout_red = OutputRedirect()
-        with stdout_red as out:
-            obs = self.cmd(input_dir=self.timing_dir)
-            obs_out = out.getvalue()
-        self.assertEqual(set(obs.keys()), set(self.exp_keys))
-        obs_data = obs['bench_data']
-        exp_data = {
-            'label' : [10.0, 20.0, 30.0, 40.0],
-            'wall_time' : ([397.446, 797.59, 1203.004, 1617.564],
-                        [9.102124148, 16.78580948, 20.07751638, 76.82548135]),
-            'cpu_user' : ([383.344, 771.106, 1166.298, 1572.904],
-                        [2.491654872, 15.08632971, 10.03758616, 59.19994041]),
-            'cpu_kernel' : ([6.678, 13.544, 19.608, 25.89],
-                        [2.336522202, 4.317965262, 6.659373544, 7.725679258]),
-            'memory' : ([9710547.2, 18743296, 27390896, 35643206.4],
-                        [92.9653699, 1068.531702852, 2554.55420768,
-                            3185.4967336])
-        }
-        # Check the contents of the observed data dictionary
-        self.assertEqual(obs_data.keys(), exp_data.keys())
-        for o, e in zip(obs_data['label'], exp_data['label']):
-            self.assertAlmostEqual(o, e)
-        for key in ['wall_time', 'cpu_user', 'cpu_kernel', 'memory']:
-            for o, e in zip(obs_data[key][0], exp_data[key][0]):
-                self.assertAlmostEqual(o, e)
-            for o, e in zip(obs_data[key][1], exp_data[key][1]):
-                self.assertAlmostEqual(o, e)
-        # Check the figures and strings
-        self.assertEqual(obs['time_fig'].__class__, Figure)
-        self.assertEqual(obs['time_str'], "40.65768*x^1 + -12.541")
-        self.assertEqual(obs['mem_fig'].__class__, Figure)
-        self.assertEqual(obs['mem_str'], "864455.776*x^1 + 1260592.0")
-        # Check the standard output
-        exp_stdout = "Warning - File %s/20/5.txt not used:\n" % self.timing_dir
-        self.assertEqual(obs_out, exp_stdout)
+        """Correctly processes the benchmark outputs"""
+        obs = self.cmd(bench_results=self.results)
+
+        self.assertEqual(obs.keys(), ['bench_data'])
+        obs = obs['bench_data']
+
+        labels = ['file_10', 'file_20', 'file_30']
+        means = BenchData([102.4, 154.8, 209.282],
+                          [98.2, 147.692, 200.594],
+                          [1.596, 6.534, 6.7546],
+                          [2528.4, 5153.2, 10537.2])
+        std_devs = BenchData([1.8547237, 4.57820926, 2.76194424],
+                             [0.55497748, 3.00350728, 2.87348986],
+                             [0.11943199, 0.5011826, 1.13082653],
+                             [5.23832034, 35.65052594, 68.93591227])
+        wall_curve = FittedCurve(np.array([53.441, 102.053]), 1)
+        mem_curve = FittedCurve(np.array([1379.6, 1245.2, 2528.4]), 2)
+        exp = SummarizedResults(labels, means, std_devs, wall_curve, mem_curve)
+        self.assertEqual(obs.labels, exp.labels)
+        assert_almost_equal(obs.means, exp.means)
+        assert_almost_equal(obs.stdevs, exp.stdevs)
+        assert_almost_equal(obs.wall_curve.poly, exp.wall_curve.poly)
+        self.assertEqual(obs.wall_curve.deg, exp.wall_curve.deg)
+        assert_almost_equal(obs.mem_curve.poly, exp.mem_curve.poly)
+        self.assertEqual(obs.mem_curve.deg, exp.mem_curve.deg)
 
 if __name__ == '__main__':
     main()
