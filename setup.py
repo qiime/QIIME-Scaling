@@ -10,7 +10,7 @@
 from setuptools import setup
 from glob import glob
 
-__version__ = "0.2.0-dev"
+__version__ = "0.0.2-dev"
 
 
 classes = """
@@ -26,7 +26,13 @@ classes = """
     Operating System :: MacOS :: MacOS X
 """
 
-long_description = ''
+long_description = '''
+The goal of this project is to produce an estimator for runtime and memory
+consumption: (runtime, memory) = f(script_name, number_of_observations,
+number_of_samples, sparsity). This estimator will be based off of empirical
+results from standard test data sets (to be created, described below) and
+validated with real world datasets.
+'''
 
 classifiers = [s.strip() for s in classes.split('\n') if s]
 
@@ -35,9 +41,9 @@ setup(name='qiime-scaling',
       long_description=long_description,
       license="BSD",
       description='qiime scaling',
-      author="jose navas",
-      author_email="",
-      url='https://github.com/biocore/qiime-scaling',
+      author="Jose Antonio Navas Molina",
+      author_email="josenavasmolina@gmail.com",
+      url='https://github.com/qiime/QIIME-Scaling',
       test_suite='nose.collector',
       packages=['scaling',
                 'scaling/commands',
